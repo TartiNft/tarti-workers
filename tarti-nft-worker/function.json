@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "tartiSbMsg",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "tarti-nft-events-dev",
+      "connection": "TARTI_QUEUE_CONNECTION_STRING"
+    }
+  ]
+}

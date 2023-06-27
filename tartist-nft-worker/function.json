@@ -1,11 +1,11 @@
 {
   "bindings": [
     {
-      "name": "mySbMsg",
+      "name": "tartistSbMsg",
       "type": "serviceBusTrigger",
       "direction": "in",
       "queueName": "tartist-nft-events-dev",
-      "connection": "tartiservicebus_SERVICEBUS"
+      "connection": "TARTIST_QUEUE_CONNECTION_STRING"
     }
   ]
 }
