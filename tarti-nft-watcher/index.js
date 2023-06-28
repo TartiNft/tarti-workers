@@ -92,6 +92,7 @@ module.exports = async function (context, myTimer) {
         const { ServiceBusClient } = require("@azure/service-bus");
         context.log("Connect to service bus for " + queueName);
         const sbClient = new ServiceBusClient(queueConnectionString);
+
         context.log("Create queue sender " + queueName);
         const sender = sbClient.createSender(queueName);
         if (queueMessages.length == 0) {
@@ -122,7 +123,7 @@ module.exports = async function (context, myTimer) {
 
         //lets mark them on the block chain as being in process
         //doing syncronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
-        context.log("Update token uri");
+        context.log(`Update ${uncreatedMetadatas.length} token uris`);
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             //for Tartis we are delegating via Tartists, since the Tartist contract owns the Tarti contract
             await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract != tartistContract).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
@@ -145,6 +146,7 @@ module.exports = async function (context, myTimer) {
         process.env['TARTI_QUEUE_NAME']
     );
 
+    context.log('Mint new artist');
     const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
     mintNewTartist(web3, tartistContract);
 
