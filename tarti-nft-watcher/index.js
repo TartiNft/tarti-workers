@@ -29,7 +29,6 @@ module.exports = async function (context, myTimer) {
         context.log("get the ethreum network id");
         const netId = await web3.eth.net.getId();
 
-        context.log(contractJson);
         context.log("get the deployed network info from id: " + netId);
         const deployedNetwork = contractJson.networks[netId];
 
