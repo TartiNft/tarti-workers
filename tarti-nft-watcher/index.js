@@ -58,9 +58,9 @@ module.exports = async function (context, myTimer) {
             value: Web3.utils.toWei("0.18", "ether"),
         });
 
-        console.log(mintResult);
+        context.log(mintResult);
 
-        console.log("Your Tartist was minted");
+        context.log("Your Tartist was minted");
     };
 
 
