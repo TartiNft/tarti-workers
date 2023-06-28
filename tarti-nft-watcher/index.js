@@ -1,3 +1,5 @@
+const { contract } = require('web3/lib/commonjs/eth.exports');
+
 module.exports = async function (context, myTimer) {
     var timeStamp = new Date().toISOString();
     context.log('JavaScript is running');
@@ -38,6 +40,34 @@ module.exports = async function (context, myTimer) {
             deployedNetwork && deployedNetwork.address
         );
     };
+
+    const mintNewTartist = async (web3, contract) => {
+        const recipientAddress = process.env['CONTRACT_OWNER_WALLET_ADDRESS']; //ethereum.selectedAddress;
+        const traitsBytes = "0x";
+        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'greegdfn sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
+        const traitDominance = [75, 75, 75, 75];
+
+        const giveBirthCaller = contract.methods.giveBirth(recipientAddress, traitsBytes, dynamicTraitValues, traitDominance);
+        const sendTxData = giveBirthCaller.encodeABI();
+        const latestGasLimit = (await web3.eth.getBlock("latest")).gasLimit;
+        const currentGasPrice = await web3.eth.getGasPrice();
+
+        const mintResult = await web3.eth.sendTransaction({
+            from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'], //ethereum.selectedAddress,
+            to: contract.options.address,
+            data: sendTxData,
+            gas: latestGasLimit,
+            value: Web3.utils.toWei("0.18", "ether"),
+        });
+
+        console.log(mintResult);
+
+        console.log("Your Tartist was minted");
+
+        UpdateArtistsFromSmartContract(contract, web3.eth.getAccounts(), web3);
+
+    };
+
 
     const enqueueTokenEvents = async (web3, contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
 
@@ -115,6 +145,9 @@ module.exports = async function (context, myTimer) {
         process.env['TARTI_QUEUE_CONNECTION_STRING'],
         process.env['TARTI_QUEUE_NAME']
     );
+
+    const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
+    mintNewTartist(web3, tartistContract);
 
     context.log('JavaScript timer trigger function ran!', timeStamp);
 };
