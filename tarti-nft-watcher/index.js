@@ -1,5 +1,3 @@
-const { contract } = require('web3/lib/commonjs/eth.exports');
-
 module.exports = async function (context, myTimer) {
     var timeStamp = new Date().toISOString();
     context.log('JavaScript is running');
@@ -44,7 +42,7 @@ module.exports = async function (context, myTimer) {
     const mintNewTartist = async (web3, contract) => {
         const recipientAddress = process.env['CONTRACT_OWNER_WALLET_ADDRESS']; //ethereum.selectedAddress;
         const traitsBytes = "0x";
-        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'greegdfn sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
+        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'hjhkghkgh sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
         const traitDominance = [75, 75, 75, 75];
 
         const giveBirthCaller = contract.methods.giveBirth(recipientAddress, traitsBytes, dynamicTraitValues, traitDominance);
@@ -63,9 +61,6 @@ module.exports = async function (context, myTimer) {
         console.log(mintResult);
 
         console.log("Your Tartist was minted");
-
-        UpdateArtistsFromSmartContract(contract, web3.eth.getAccounts(), web3);
-
     };
 
 
