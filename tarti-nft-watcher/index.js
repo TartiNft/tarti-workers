@@ -85,6 +85,7 @@ module.exports = async function (context, myTimer) {
 
         context.log("Getting total supply");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
+        context.log(`Total supply for ${queueName}: ${totalSupply}`);
         const queueMessages = [];
 
         //go back through tokens and find the last one that has not been created yet
