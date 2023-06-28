@@ -88,7 +88,7 @@ module.exports = async function (context, myTimer) {
     };
 
     context.log('Enqueue Tartist events');
-    enqueueTokenEvents(
+    await enqueueTokenEvents(
         web3, __dirname + "/contracts/Tartist.json",
         newlyMintedTartistUri,
         process.env['TARTIST_QUEUE_CONNECTION_STRING'],
@@ -96,7 +96,7 @@ module.exports = async function (context, myTimer) {
     );
 
     context.log('Enqueue Tarti events');
-    enqueueTokenEvents(
+    await enqueueTokenEvents(
         web3, __dirname + "/contracts/Tarti.json",
         newlyMintedTartiUri,
         process.env['TARTI_QUEUE_CONNECTION_STRING'],
