@@ -35,13 +35,18 @@ module.exports = async function (context, myTimer) {
 
     const enqueueTokenEvents = async (web3, contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
 
+        context.log("Getting token contract");
         const tokenToQueueContract = await getContract(web3, contractJsonFile);
+
+        context.log("Getting Tartist contract");
         const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
 
+        context.log("Getting total supply");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
         const queueMessages = [];
 
         //go back through tokens and find the last one that has not been created yet
+        context.log("Find NFTs without metadata");
         const uncreatedMetadatas = [];
         for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
             const tokenUri = await tokenToQueueContract.methods.tokenURI(tokenId).call();
@@ -52,6 +57,7 @@ module.exports = async function (context, myTimer) {
             uncreatedMetadatas.push(tokenId);
         }
 
+        context.log("Queue messages");
         const { ServiceBusClient } = require("@azure/service-bus");
         const sbClient = new ServiceBusClient(queueConnectionString);
         const sender = sbClient.createSender(queueName);
@@ -81,6 +87,7 @@ module.exports = async function (context, myTimer) {
 
         //lets mark them on the block chain as being in process
         //doing syncronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
+        context.log("Update token uri");
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             //for Tartis we are delegating via Tartists, since the Tartist contract owns the Tarti contract
             await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract != tartistContract).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
