@@ -93,6 +93,7 @@ module.exports = async function (context, myTimer) {
         const uncreatedMetadatas = [];
         for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
             const tokenUri = await tokenToQueueContract.methods.tokenURI(tokenId).call();
+            context.log(`Checking if ${tokenUri} is the same as ${newTokenUri}`)
             if (tokenUri != newTokenUri) {
                 break;
             }
