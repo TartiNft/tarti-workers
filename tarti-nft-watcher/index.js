@@ -23,10 +23,13 @@ module.exports = async function (context, myTimer) {
     web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
 
     const getContract = async (web3, contractJsonFile) => {
+        context.log("get contract: " + contractJsonFile);
         const fs = require('fs');
         const contractJson = JSON.parse(fs.readFileSync(contractJsonFile));
         const netId = await web3.eth.net.getId();
         const deployedNetwork = contractJson.networks[netId];
+
+        context.log("Instance contract now");
         return new web3.eth.Contract(
             contractJson.abi,
             deployedNetwork && deployedNetwork.address
