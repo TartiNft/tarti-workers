@@ -8,12 +8,18 @@ module.exports = async function (context, myTimer) {
     // on dev this is in local.settings.json
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
+    context.log('Get environment vars');
     const ethClientUri = process.env["ETH_CLIENT_URL"];
     const newlyMintedTartistUri = process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = process.env["NEW_TARTI_METADATA_CID"];
 
+    context.log('Get web3');
     const { Web3 } = require('web3');
+
+    context.log('Connect to ethereum');
     const web3 = new Web3(ethClientUri);
+
+    context.log('Add contract owner wallet');
     web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
 
     const getContract = async (web3, contractJsonFile) => {
@@ -81,6 +87,7 @@ module.exports = async function (context, myTimer) {
         }
     };
 
+    context.log('Enqueue Tartist events');
     enqueueTokenEvents(
         web3, __dirname + "/contracts/Tartist.json",
         newlyMintedTartistUri,
@@ -88,6 +95,7 @@ module.exports = async function (context, myTimer) {
         process.env['TARTIST_QUEUE_NAME']
     );
 
+    context.log('Enqueue Tarti events');
     enqueueTokenEvents(
         web3, __dirname + "/contracts/Tarti.json",
         newlyMintedTartiUri,
