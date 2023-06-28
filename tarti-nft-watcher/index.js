@@ -9,8 +9,8 @@ module.exports = async function (context, myTimer) {
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
     const ethClientUri = process.env["ETH_CLIENT_URL"];
-    const newlyMintedTokenUri = 'ipfs://QhashOfNewUnstartedTokenMetadata...';
-    const tokenInProgressUri = 'ipfs://QhashOfNewTokenThatHasStartedBeingBuiltMetadata...';
+    const newlyMintedTokenUri = 'ipfs://QhashOfNewTartistMetadata';
+    const tokenInProgressUri = 'ipfs://QhashOfCreatingTartistMetadata';
 
     const { Web3 } = require('web3');
     const web3 = new Web3(ethClientUri);
