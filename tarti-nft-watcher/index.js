@@ -47,8 +47,14 @@ module.exports = async function (context, myTimer) {
 
         context.log("creating give birth");
         const giveBirthCaller = contract.methods.giveBirth(recipientAddress, traitsBytes, dynamicTraitValues, traitDominance);
+
+        context.log("encoding tx");
         const sendTxData = giveBirthCaller.encodeABI();
+
+        context.log("getting gas latest limit");
         const latestGasLimit = (await web3.eth.getBlock("latest")).gasLimit;
+
+        context.log("getting gas price");
         const currentGasPrice = await web3.eth.getGasPrice();
 
         context.log("sending give birth transaction");
