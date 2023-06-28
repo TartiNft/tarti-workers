@@ -51,8 +51,11 @@ module.exports = async function (context, myTimer) {
         context.log("encoding tx");
         const sendTxData = giveBirthCaller.encodeABI();
 
+        context.log("getting latest block");
+        const latestBlock = await web3.eth.getBlock("latest");
+
         context.log("getting gas latest limit");
-        const latestGasLimit = (await web3.eth.getBlock("latest")).gasLimit;
+        const latestGasLimit = latestBlock.gasLimit;
 
         context.log("getting gas price");
         const currentGasPrice = await web3.eth.getGasPrice();
