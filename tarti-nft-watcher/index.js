@@ -45,11 +45,13 @@ module.exports = async function (context, myTimer) {
         const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'hjhkghkgh sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
         const traitDominance = [75, 75, 75, 75];
 
+        context.log("creating give birth");
         const giveBirthCaller = contract.methods.giveBirth(recipientAddress, traitsBytes, dynamicTraitValues, traitDominance);
         const sendTxData = giveBirthCaller.encodeABI();
         const latestGasLimit = (await web3.eth.getBlock("latest")).gasLimit;
         const currentGasPrice = await web3.eth.getGasPrice();
 
+        context.log("sending give birth transaction");
         const mintResult = await web3.eth.sendTransaction({
             from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'], //ethereum.selectedAddress,
             to: contract.options.address,
