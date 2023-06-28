@@ -6,6 +6,8 @@
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@azure/service-bus": "^7.9.0",
+    "web3": "^4.0.1"
+  }
 }
