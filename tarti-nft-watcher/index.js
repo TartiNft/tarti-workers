@@ -92,7 +92,7 @@ module.exports = async function (context, myTimer) {
         context.log("Find NFTs without metadata");
         const uncreatedMetadatas = [];
         for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
-            const tokenUri = await tokenToQueueContract.methods.tokenURI(tokenId).call();
+            const tokenUri = (await tokenToQueueContract.methods.tokenURI(tokenId).call()).trim();
             context.log(`Checking if ${tokenUri} is the same as ${newTokenUri}`)
             if (tokenUri != newTokenUri) {
                 break;
@@ -102,16 +102,18 @@ module.exports = async function (context, myTimer) {
         }
 
         context.log("Queue messages");
+        if (queueMessages.length == 0) {
+            context.log(`There are no messages to enqueue for ${queueName}`);
+            return;
+        }
         const { ServiceBusClient } = require("@azure/service-bus");
         context.log("Connect to service bus for " + queueName);
         const sbClient = new ServiceBusClient(queueConnectionString);
 
         context.log("Create queue sender " + queueName);
         const sender = sbClient.createSender(queueName);
-        if (queueMessages.length == 0) {
-            context.log(`There are no messages to enqueue for ${queueName}`);
-            return;
-        }
+
+
         context.log("Batch and queue " + queueName);
         let batch = await sender.createMessageBatch();
         for (let i = 0; i < queueMessages.length; i++) {
