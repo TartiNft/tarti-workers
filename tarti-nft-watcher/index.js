@@ -92,7 +92,7 @@ module.exports = async function (context, myTimer) {
         context.log("Find NFTs without metadata");
         const uncreatedMetadatas = [];
         for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
-            const tokenUri = (await tokenToQueueContract.methods.tokenURI(tokenId).call()).replace(/[^\x00-\x7F]/g, "");
+            const tokenUri = (await tokenToQueueContract.methods.tokenURI(tokenId).call()).substring(0, newTokenUri.length);
             context.log(`Checking if ${tokenUri} is the same as ${newTokenUri}`)
             if (tokenUri != newTokenUri) {
                 break;
