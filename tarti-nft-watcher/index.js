@@ -5,6 +5,7 @@ module.exports = async function (context, myTimer) {
         context.log('JavaScript is running late!');
     }
 
+    context.log('Function is running!');
     // on dev this is in local.settings.json
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
