@@ -42,7 +42,7 @@ module.exports = async function (context, myTimer) {
     const mintNewTartist = async (web3, contract) => {
         const recipientAddress = process.env['CONTRACT_OWNER_WALLET_ADDRESS']; //ethereum.selectedAddress;
         const traitsBytes = "0x";
-        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'hjhkghkghfghh sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
+        const dynamicTraitValues = ['purpule sdjfsdfhg ghjgghj', 'dfsgdfsg sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
         const traitDominance = [75, 75, 75, 75];
 
         context.log("creating give birth");
