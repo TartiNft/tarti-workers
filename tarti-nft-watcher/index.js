@@ -42,7 +42,7 @@ module.exports = async function (context, myTimer) {
     const mintNewTartist = async (web3, contract) => {
         const recipientAddress = process.env['CONTRACT_OWNER_WALLET_ADDRESS']; //ethereum.selectedAddress;
         const traitsBytes = "0x";
-        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'hjhkghkgh sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
+        const dynamicTraitValues = ['purpule sdjfsdfhg klsdhfklg', 'hjhkghkghfghh sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
         const traitDominance = [75, 75, 75, 75];
 
         context.log("creating give birth");
@@ -161,7 +161,7 @@ module.exports = async function (context, myTimer) {
     const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
 
     context.log('Mint new artist');
-    mintNewTartist(web3, tartistContract);
+    await mintNewTartist(web3, tartistContract);
 
     context.log('JavaScript timer trigger function ran!', timeStamp);
 };
