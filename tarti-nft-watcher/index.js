@@ -29,7 +29,7 @@ module.exports = async function (context, myTimer) {
         const netId = await web3.eth.net.getId();
         const deployedNetwork = contractJson.networks[netId];
 
-        context.log("Instance contract now");
+        context.log(`Instance contract now ${deployedNetwork.address}`);
         return new web3.eth.Contract(
             contractJson.abi,
             deployedNetwork && deployedNetwork.address
