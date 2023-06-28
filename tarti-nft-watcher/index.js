@@ -9,8 +9,8 @@ module.exports = async function (context, myTimer) {
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
     const ethClientUri = process.env["ETH_CLIENT_URL"];
-    const newlyMintedTokenUri = 'ipfs://QhashOfNewTartistMetadata';
-    const tokenInProgressUri = 'ipfs://QhashOfCreatingTartistMetadata';
+    const newlyMintedTokenUri = `ipfs://${process.env['NEW_TARTIST_METADATA_CID']}`;
+    const tokenInProgressUri = `ipfs://${process.env['CREATING_TARTIST_METADATA_CID']}`;
 
     const { Web3 } = require('web3');
     const web3 = new Web3(ethClientUri);
@@ -37,13 +37,12 @@ module.exports = async function (context, myTimer) {
     const uncreatedTartists = [];
     for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
         const tokenUri = await contract.methods.tokenURI(tokenId).call();
-        if (tokenUri != tokenUri) { //COMMENT THIS
-            //UNCOMMENT THIS!!! //if (tokenUri != newlyMintedTokenUri) {
+        context.log("token uri from contract: " + tokenUri);
+        if (tokenUri != newlyMintedTokenUri) {
             break;
         }
         queueMessages.push({ body: tokenId.toString() });
         uncreatedTartists.push(tokenId);
-        console.log(tokenUri);
     }
 
     const serviceBusConnectionString = process.env['SERVICE_BUS_CONNECTION_STRING'];
