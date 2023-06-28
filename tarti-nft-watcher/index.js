@@ -114,24 +114,30 @@ module.exports = async function (context, myTimer) {
         const sender = sbClient.createSender(queueName);
 
 
-        context.log("Batch and queue " + queueName);
+        context.log("Create batch for " + queueName);
         let batch = await sender.createMessageBatch();
+        context.log("Batch and queue " + queueName);
         for (let i = 0; i < queueMessages.length; i++) {
+            context.log("Add message to queue");
             if (!batch.tryAddMessage(queueMessages[i])) {
                 // if it fails to add the message to the current batch
                 // send the current batch as it is full
+                context.log("commit the batch 1");
                 await sender.sendMessages(batch);
 
                 // then, create a new batch 
+                context.log("create batch 2");
                 batch = await sender.createMessageBatch();
 
                 // now, add the message failed to be added to the previous batch to this batch
+                context.log("add msg 2");
                 if (!batch.tryAddMessage(queueMessages[i])) {
                     // if it still can't be added to the batch, the individual message is probably too big to fit in a batch
                     throw new Error("Message too big to fit in a batch");
                 }
             }
         }
+        context.log("commit the batch 2");
         context.log("Send " + queueName);
         await sender.sendMessages(batch);
         await sender.close();
