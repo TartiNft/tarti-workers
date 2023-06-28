@@ -10,8 +10,8 @@ module.exports = async function (context, myTimer) {
     // on test it is in Azure deploy slot config
     context.log('Get environment vars');
     const ethClientUri = process.env["ETH_CLIENT_URL"];
-    const newlyMintedTartistUri = process.env["NEW_TARTIST_METADATA_CID"];
-    const newlyMintedTartiUri = process.env["NEW_TARTI_METADATA_CID"];
+    const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
+    const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
 
     context.log('Get web3');
     const { Web3 } = require('web3');
