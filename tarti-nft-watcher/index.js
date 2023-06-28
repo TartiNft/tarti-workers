@@ -90,12 +90,15 @@ module.exports = async function (context, myTimer) {
 
         context.log("Queue messages");
         const { ServiceBusClient } = require("@azure/service-bus");
+        context.log("Connect to service bus for " + queueName);
         const sbClient = new ServiceBusClient(queueConnectionString);
+        context.log("Create queue sender " + queueName);
         const sender = sbClient.createSender(queueName);
         if (queueMessages.length == 0) {
             context.log(`There are no messages to enqueue for ${queueName}`);
             return;
         }
+        context.log("Batch and queue " + queueName);
         let batch = await sender.createMessageBatch();
         for (let i = 0; i < queueMessages.length; i++) {
             if (!batch.tryAddMessage(queueMessages[i])) {
@@ -113,6 +116,7 @@ module.exports = async function (context, myTimer) {
                 }
             }
         }
+        context.log("Send " + queueName);
         await sender.sendMessages(batch);
         await sender.close();
 
