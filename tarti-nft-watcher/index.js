@@ -8,31 +8,19 @@ module.exports = async function (context, myTimer) {
     // on dev this is in local.settings.json
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
-    context.log('Get environment vars');
     const ethClientUri = process.env["ETH_CLIENT_URL"];
     const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
 
-    context.log('Get web3');
     const { Web3 } = require('web3');
-
-    context.log('Connect to ethereum');
     const web3 = new Web3(ethClientUri);
-
-    context.log('Add contract owner wallet');
     web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
 
     const getContract = async (web3, contractJsonFile) => {
-        context.log("get contract: " + contractJsonFile);
         const fs = require('fs');
         const contractJson = JSON.parse(fs.readFileSync(contractJsonFile));
-        context.log("get the ethreum network id");
         const netId = await web3.eth.net.getId();
-
-        context.log("get the deployed network info from id: " + netId);
         const deployedNetwork = contractJson.networks[netId];
-
-        context.log(`Instance contract now ${deployedNetwork.address}`);
         return new web3.eth.Contract(
             contractJson.abi,
             deployedNetwork && deployedNetwork.address
@@ -76,20 +64,12 @@ module.exports = async function (context, myTimer) {
 
 
     const enqueueTokenEvents = async (web3, contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
-
-        context.log("Getting token contract");
         const tokenToQueueContract = await getContract(web3, contractJsonFile);
-
-        context.log("Getting Tartist contract");
         const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
-
-        context.log("Getting total supply");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
-        context.log(`Total supply for ${queueName}: ${totalSupply}`);
         const queueMessages = [];
 
         //go back through tokens and find the last one that has not been created yet
-        context.log("Find NFTs without metadata");
         const uncreatedMetadatas = [];
         for (let tokenId = totalSupply; tokenId > 0; tokenId--) {
             const tokenUri = (await tokenToQueueContract.methods.tokenURI(tokenId).call()).substring(0, newTokenUri.length);
@@ -101,44 +81,30 @@ module.exports = async function (context, myTimer) {
             uncreatedMetadatas.push(tokenId);
         }
 
-        context.log("Queue messages");
         if (queueMessages.length == 0) {
             context.log(`There are no messages to enqueue for ${queueName}`);
             return;
         }
         const { ServiceBusClient } = require("@azure/service-bus");
-        context.log("Connect to service bus for " + queueName);
         const sbClient = new ServiceBusClient(queueConnectionString);
-
-        context.log("Create queue sender " + queueName);
         const sender = sbClient.createSender(queueName);
-
-
-        context.log("Create batch for " + queueName);
         let batch = await sender.createMessageBatch();
-        context.log("Batch and queue " + queueName);
         for (let i = 0; i < queueMessages.length; i++) {
-            context.log("Add message to queue");
             if (!batch.tryAddMessage(queueMessages[i])) {
                 // if it fails to add the message to the current batch
                 // send the current batch as it is full
-                context.log("commit the batch 1");
                 await sender.sendMessages(batch);
 
                 // then, create a new batch 
-                context.log("create batch 2");
                 batch = await sender.createMessageBatch();
 
                 // now, add the message failed to be added to the previous batch to this batch
-                context.log("add msg 2");
                 if (!batch.tryAddMessage(queueMessages[i])) {
                     // if it still can't be added to the batch, the individual message is probably too big to fit in a batch
                     throw new Error("Message too big to fit in a batch");
                 }
             }
         }
-        context.log("commit the batch 2");
-        context.log("Send " + queueName);
         await sender.sendMessages(batch);
         await sender.close();
 
@@ -146,15 +112,7 @@ module.exports = async function (context, myTimer) {
         //doing syncronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
-            //for Tartis we are delegating via Tartists, since the Tartist contract owns the Tarti contract
-            context.log("set creation started");
-
-            //TESTINGTHIS THIS!!!!!!!
             await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
-
-            //UNCOMMENT THIS IF ABOEVF FAILS!!!!!!!!
-            //fix the comparison so it is not always true
-            //await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract != tartistContract).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
         }
     };
 
