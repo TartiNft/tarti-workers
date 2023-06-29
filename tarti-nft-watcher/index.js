@@ -167,11 +167,10 @@ module.exports = async function (context, myTimer) {
         process.env['TARTI_QUEUE_NAME']
     );
 
-    context.log('Get contract new artist');
-    const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
-
-    context.log('Mint new artist');
-    await mintNewTartist(web3, tartistContract);
+    // context.log('Get contract new artist');
+    // const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
+    //context.log('Mint new artist');
+    //    await mintNewTartist(web3, tartistContract);
 
     context.log('JavaScript timer trigger function ran!', timeStamp);
 };
