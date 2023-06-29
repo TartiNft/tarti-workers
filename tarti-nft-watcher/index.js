@@ -147,7 +147,14 @@ module.exports = async function (context, myTimer) {
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             //for Tartis we are delegating via Tartists, since the Tartist contract owns the Tarti contract
-            await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract != tartistContract).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
+            context.log("set creation started");
+
+            //TESTINGTHIS THIS!!!!!!!
+            await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
+
+            //UNCOMMENT THIS IF ABOEVF FAILS!!!!!!!!
+            //fix the comparison so it is not always true
+            //await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract != tartistContract).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
         }
     };
 
