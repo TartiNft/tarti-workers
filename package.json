@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@azure/service-bus": "^7.9.0",
+    "@pinata/sdk": "^2.1.0",
+    "axios": "^1.4.0",
     "web3": "^4.0.2"
   }
 }
