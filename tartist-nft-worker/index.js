@@ -77,7 +77,7 @@ module.exports = async function (context, tartistSbMsg) {
 
     //upload metadata to IPFS usaing PInata
     const pinataSDK = require('@pinata/sdk');
-    const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_KEY"] });
+    const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
     const authResult = await pinata.testAuthentication();
     //if authResult checkauth
     const pinResponse = await pinata.pinJSONToIPFS(botMetaData);
