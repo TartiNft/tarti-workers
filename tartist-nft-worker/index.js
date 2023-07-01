@@ -61,18 +61,19 @@ module.exports = async function (context, tartistSbMsg) {
     };
 
     //generate Title from Trait API
-    botMetaData.name = promptBot("Generate Name", botMetaData);
+    botMetaData.name = promptBot("Generate Your Name", botMetaData)[0];
 
 
     //generate description
-    botMetaData.description = promptBot("Generate Description", botMetaData);
+    botMetaData.description = promptBot("Generate Your Description", botMetaData)[0];
 
 
     //generate bots fav bg color
-    botMetaData.background_color = promptBot("Choose Avatar Background Color", botMetaData);
+    botMetaData.background_color = "FFFFFF";
 
     //generate Avatar
-    botMetaData.image = promptBot("Generate Avatar And Pin On Ipfs", botMetaData); //TraitHttpIO will return an IPFS URI
+    const avatarPathsOnBot = promptBot("Get Avatar", botMetaData); //TraitHttpIO will return an IPFS URI
+    botMetaData.image = promptBot("Pin Files To Ipfs", botMetaData, { "Files": avatarPathsOnBot })[0]; //TraitHttpIO will return an IPFS URI
 
     //upload metadata to IPFS usaing PInata
     const pinataSDK = require('@pinata/sdk');
