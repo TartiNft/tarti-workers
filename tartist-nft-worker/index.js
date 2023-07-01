@@ -72,7 +72,7 @@ module.exports = async function (context, tartistSbMsg) {
     botMetaData.background_color = "FFFFFF";
 
     //generate Avatar
-    const avatarPathsOnBot = promptBot("Get Avatar", botMetaData); //TraitHttpIO will return an IPFS URI
+    const avatarPathsOnBot = promptBot("Get Avatar", botMetaData); //Will return file path local to the bot
     botMetaData.image = promptBot("Pin Files To Ipfs", botMetaData, { "Files": avatarPathsOnBot })[0]; //TraitHttpIO will return an IPFS URI
 
     //upload metadata to IPFS usaing PInata
