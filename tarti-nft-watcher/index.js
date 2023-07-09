@@ -65,7 +65,7 @@ module.exports = async function (context, myTimer) {
 
     const enqueueTokenEvents = async (web3, contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
         const tokenToQueueContract = await getContract(web3, contractJsonFile);
-        const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
+        const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
         const queueMessages = [];
 
@@ -118,7 +118,7 @@ module.exports = async function (context, myTimer) {
 
     context.log('Enqueue Tartist events');
     await enqueueTokenEvents(
-        web3, __dirname + "/contracts/Tartist.json",
+        web3, __dirname + "/../contracts/Tartist.json",
         newlyMintedTartistUri,
         process.env['TARTIST_QUEUE_CONNECTION_STRING'],
         process.env['TARTIST_QUEUE_NAME']
@@ -126,14 +126,14 @@ module.exports = async function (context, myTimer) {
 
     context.log('Enqueue Tarti events');
     await enqueueTokenEvents(
-        web3, __dirname + "/contracts/Tarti.json",
+        web3, __dirname + "/../contracts/Tarti.json",
         newlyMintedTartiUri,
         process.env['TARTI_QUEUE_CONNECTION_STRING'],
         process.env['TARTI_QUEUE_NAME']
     );
 
     // context.log('Get contract new artist');
-    // const tartistContract = await getContract(web3, __dirname + "/contracts/Tartist.json");
+    // const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
     //context.log('Mint new artist');
     //    await mintNewTartist(web3, tartistContract);
 

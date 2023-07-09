@@ -15,5 +15,8 @@
   "concurrency": {
     "dynamicConcurrencyEnabled": true,
     "snapshotPersistenceEnabled": true
-  }
+  },
+  "watchDirectories": [
+    "contracts"
+  ]
 }

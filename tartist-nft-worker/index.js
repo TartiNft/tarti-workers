@@ -1,11 +1,23 @@
 module.exports = async function (context, tartistSbMsg) {
 
+    const getContract = async (web3, contractJsonFile) => {
+        const fs = require('fs');
+        const contractJson = JSON.parse(fs.readFileSync(contractJsonFile));
+        const netId = await web3.eth.net.getId();
+        const deployedNetwork = contractJson.networks[netId];
+        return new web3.eth.Contract(
+            contractJson.abi,
+            deployedNetwork && deployedNetwork.address
+        );
+    };
+
     const tokenId = tartistSbMsg;
 
     //get bot info from the block chain
-    const traits = await contract.methods.botTraits(tokenId).call();
-    const traitDynValues = await contract.methods.botTraitValues(tokenId).call();
-    const botTraitDominances = await contract.methods.botTraitDominances(tokenId).call();
+    const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
+    const traits = await tartistContract.methods.botTraits(tokenId).call();
+    const traitDynValues = await tartistContract.methods.botTraitValues(tokenId).call();
+    const botTraitDominances = await tartistContract.methods.botTraitDominances(tokenId).call();
 
     //generate metadata with some place holders
     const metaAttributes = [];
@@ -17,7 +29,7 @@ module.exports = async function (context, tartistSbMsg) {
 
     for (let traitIdx = 0; traitIdx < traits.length; traitIdx++) {
 
-        const traitName = await contract.methods.availableTraits(traits[traitIdx]).call();
+        const traitName = await tartistContract.methods.availableTraits(traits[traitIdx]).call();
 
         if (traitDynValues[traitIdx]) {
             metaAttributes.push({
@@ -84,7 +96,7 @@ module.exports = async function (context, tartistSbMsg) {
     const metaDataFileHash = pinResponse.IpfsHash;
 
     //update the tokenuri on ethereum
-    contract.methods.setComplete(tokenId, metaDataFileHash);
+    tartistContract.methods.setComplete(tokenId, metaDataFileHash);
 
     context.log('JavaScript ServiceBus queue trigger function processed message', tartistSbMsg);
 };
