@@ -1,5 +1,10 @@
 module.exports = async function (context, tartistSbMsg) {
 
+    const { Web3 } = require('web3');
+    const ethClientUri = process.env["ETH_CLIENT_URL"];
+    const web3 = new Web3(ethClientUri);
+    web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
+
     const getContract = async (web3, contractJsonFile) => {
         const fs = require('fs');
         const contractJson = JSON.parse(fs.readFileSync(contractJsonFile));
@@ -11,13 +16,13 @@ module.exports = async function (context, tartistSbMsg) {
         );
     };
 
-    const tokenId = tartistSbMsg;
+    const tokenId = parseInt(tartistSbMsg);
 
     //get bot info from the block chain
     const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
-    const traits = await tartistContract.methods.botTraits(tokenId).call();
-    const traitDynValues = await tartistContract.methods.botTraitValues(tokenId).call();
-    const botTraitDominances = await tartistContract.methods.botTraitDominances(tokenId).call();
+    const traits = await tartistContract.methods.getTraits(tokenId).call();
+    const traitDynValues = await tartistContract.methods.getTraitValues(tokenId).call();
+    const botTraitDominances = await tartistContract.methods.getTraitDominances(tokenId).call();
 
     //generate metadata with some place holders
     const metaAttributes = [];
@@ -27,6 +32,14 @@ module.exports = async function (context, tartistSbMsg) {
         "value": Math.floor(Date.now() / 1000)
     });
 
+    //add default traits
+    // metaAttributes.push({ "value": "GenericBotNamer" });
+    // metaAttributes.push({ "value": "GenericBotDescriber" });
+    // metaAttributes.push({ "value": "OpenApiChatter" });
+    // metaAttributes.push({ "value": "AvatarGenerator" });
+    // metaAttributes.push({ "value": "ImageGenerator" });
+    // metaAttributes.push({ "value": "FileDownloader" });
+
     for (let traitIdx = 0; traitIdx < traits.length; traitIdx++) {
 
         const traitName = await tartistContract.methods.availableTraits(traits[traitIdx]).call();
@@ -34,21 +47,17 @@ module.exports = async function (context, tartistSbMsg) {
         if (traitDynValues[traitIdx]) {
             metaAttributes.push({
                 "trait_type": traitName,
-                "value": traitDynValues[traitIdx]
+                "value": traitDynValues[traitIdx],
+                "dominance": botTraitDominances[traitIdx]
             });
 
         } else {
             metaAttributes.push({
-                "value": traitName
+                "value": traitName,
+                "dominance": botTraitDominances[traitIdx]
             });
         }
     }
-    metaAttributes.push(
-        {
-            "trait_type": "Dominance",
-            "value": botTraitDominances[traitIdx]
-        }
-    );
 
     //create metadata
     const botMetaData = {
@@ -60,43 +69,59 @@ module.exports = async function (context, tartistSbMsg) {
         "attributes": metaAttributes
     }
 
-    const promptBot = async (prompt, metaData) => {
+    const promptBot = (prompt, metaData, contextParams) => {
         const axios = require('axios');
-        axios.post(`${process.env["TRAIT_HTTP_URI"]}/prompt_bot?prompt=${prompt}`, {
+        let contextParamsQueryString = "";
+
+        for (const param in contextParams) {
+            contextParamsQueryString = `&${param}=${contextParams[param]} ${contextParamsQueryString}`;
+        }
+        return axios.post(`${process.env["TRAIT_HTTP_URI"]}/prompt_bot?prompt=${prompt}${contextParamsQueryString.trim()}`, {
             bot_metadata: metaData
         }).then(function (response) {
-            const responseJson = JSON.parse(response);
-            return responseJson.BotResponse;
-        }).catch(function (error) {
-            throw new error(`Error prompting bot: ${error}`);
+            return JSON.parse(response.data.BotResponse.trim());
         });
     };
 
-    //generate Title from Trait API
-    botMetaData.name = promptBot("Generate Your Name", botMetaData)[0];
+    try {
+        //generate Title from Trait API
+        botMetaData.name = (await promptBot("GenerateYourName", botMetaData))[0];
+        //generate description
+        botMetaData.description = (await promptBot("GenerateYourDescription", botMetaData))[0];
+    } catch (error) {
 
-
-    //generate description
-    botMetaData.description = promptBot("Generate Your Description", botMetaData)[0];
-
+        console.log(error);
+        throw error;
+    }
 
     //generate bots fav bg color
     botMetaData.background_color = "FFFFFF";
 
     //generate Avatar
-    const avatarPathsOnBot = promptBot("Get Avatar", botMetaData); //Will return file path local to the bot
-    botMetaData.image = promptBot("Pin Files To Ipfs", botMetaData, { "Files": avatarPathsOnBot })[0]; //TraitHttpIO will return an IPFS URI
+    try {
+        const avatarPathsOnBot = await promptBot("GetAvatar", botMetaData); //Will return file path local to the bot
+        botMetaData.image = "ipfs://" + (await promptBot("PinFilesToIpfs", botMetaData, { "Files": avatarPathsOnBot.join() }))[0]; //TraitHttpIO will return an IPFS CID
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 
-    //upload metadata to IPFS usaing PInata
-    const pinataSDK = require('@pinata/sdk');
-    const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
-    const authResult = await pinata.testAuthentication();
-    //if authResult checkauth
-    const pinResponse = await pinata.pinJSONToIPFS(botMetaData);
-    const metaDataFileHash = pinResponse.IpfsHash;
+    try {
+        //upload metadata to IPFS usaing PInata
+        const pinataSDK = require('@pinata/sdk');
+        const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
+        const authResult = await pinata.testAuthentication();
+        //if authResult checkauth
+        const pinResponse = await pinata.pinJSONToIPFS(botMetaData);
+        const metaDataFileHash = pinResponse.IpfsHash;
 
-    //update the tokenuri on ethereum
-    tartistContract.methods.setComplete(tokenId, metaDataFileHash);
+        //update the tokenuri on ethereum
+        tartistContract.methods.setCreated(tokenId, web3.utils.fromAscii(metaDataFileHash), false).send({ from: web3.eth.accounts.wallet[0].address });
+        context.log(`Metadata hash: ${metaDataFileHash}`);
+    } catch (error) {
+        context.log(error);
+        throw error;
+    }
 
     context.log('JavaScript ServiceBus queue trigger function processed message', tartistSbMsg);
 };
