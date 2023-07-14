@@ -8,64 +8,13 @@ module.exports = async function (context, myTimer) {
     // on dev this is in local.settings.json
     // on prod it is in Azure app config
     // on test it is in Azure deploy slot config
-    const ethClientUri = process.env["ETH_CLIENT_URL"];
     const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
 
-    const { Web3 } = require('web3');
-    const web3 = new Web3(ethClientUri);
-    web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
-
-    const getContract = async (web3, contractJsonFile) => {
-        const fs = require('fs');
-        const contractJson = JSON.parse(fs.readFileSync(contractJsonFile));
-        const netId = await web3.eth.net.getId();
-        const deployedNetwork = contractJson.networks[netId];
-        return new web3.eth.Contract(
-            contractJson.abi,
-            deployedNetwork && deployedNetwork.address
-        );
-    };
-
-    const mintNewTartist = async (web3, contract) => {
-        const recipientAddress = process.env['CONTRACT_OWNER_WALLET_ADDRESS']; //ethereum.selectedAddress;
-        const traitsBytes = "0x";
-        const dynamicTraitValues = ['purpule sdjfsdfhg ghjgghj', 'dfsgdfsg sdf olf ', 'blue', 'sdfg ssdf g sdsdf g', 'dhrtbdrtbdtb'];
-        const traitDominance = [75, 75, 75, 75];
-
-        context.log("creating give birth");
-        const giveBirthCaller = contract.methods.giveBirth(recipientAddress, traitsBytes, dynamicTraitValues, traitDominance);
-
-        context.log("encoding tx");
-        const sendTxData = giveBirthCaller.encodeABI();
-
-        context.log("getting latest block");
-        const latestBlock = await web3.eth.getBlock("latest");
-
-        context.log("getting gas latest limit");
-        const latestGasLimit = latestBlock.gasLimit;
-
-        context.log("getting gas price");
-        const currentGasPrice = await web3.eth.getGasPrice();
-
-        context.log("sending give birth transaction");
-        const mintResult = await web3.eth.sendTransaction({
-            from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'], //ethereum.selectedAddress,
-            to: contract.options.address,
-            data: sendTxData,
-            gas: latestGasLimit,
-            value: Web3.utils.toWei("0.18", "ether"),
-        });
-
-        context.log(mintResult);
-
-        context.log("Your Tartist was minted");
-    };
-
-
-    const enqueueTokenEvents = async (web3, contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
-        const tokenToQueueContract = await getContract(web3, contractJsonFile);
-        const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
+    const nft = require("../nft");
+    const enqueueTokenEvents = async (contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
+        const tokenToQueueContract = await nft.getContract(contractJsonFile);
+        const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
         const queueMessages = [];
 
@@ -118,7 +67,7 @@ module.exports = async function (context, myTimer) {
 
     context.log('Enqueue Tartist events');
     await enqueueTokenEvents(
-        web3, __dirname + "/../contracts/Tartist.json",
+        __dirname + "/../contracts/Tartist.json",
         newlyMintedTartistUri,
         process.env['TARTIST_QUEUE_CONNECTION_STRING'],
         process.env['TARTIST_QUEUE_NAME']
@@ -126,16 +75,11 @@ module.exports = async function (context, myTimer) {
 
     context.log('Enqueue Tarti events');
     await enqueueTokenEvents(
-        web3, __dirname + "/../contracts/Tarti.json",
+        __dirname + "/../contracts/Tarti.json",
         newlyMintedTartiUri,
         process.env['TARTI_QUEUE_CONNECTION_STRING'],
         process.env['TARTI_QUEUE_NAME']
     );
-
-    // context.log('Get contract new artist');
-    // const tartistContract = await getContract(web3, __dirname + "/../contracts/Tartist.json");
-    //context.log('Mint new artist');
-    //    await mintNewTartist(web3, tartistContract);
 
     context.log('JavaScript timer trigger function ran!', timeStamp);
 };
