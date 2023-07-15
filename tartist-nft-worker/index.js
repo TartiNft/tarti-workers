@@ -47,23 +47,12 @@ module.exports = async function (context, tartistSbMsg) {
     }
 
     const traitio = require("../traithttpclient");
-    const promptBot = (prompt, metaData, contextParams) => {
-        if (!contextParams) {
-            contextParams = {};
-        }
-        contextParams["prompt"] = prompt;
-        return traitio.postTraitAi("prompt_bot", contextParams, {
-            bot_metadata: metaData
-        }).then(function (response) {
-            return response;
-        });
-    };
 
     try {
         //generate Title from Trait API
-        botMetaData.name = (await promptBot("GenerateYourName", botMetaData))[0];
+        botMetaData.name = (await traitio.promptBot("GenerateYourName", botMetaData))[0];
         //generate description
-        botMetaData.description = (await promptBot("GenerateYourDescription", botMetaData))[0];
+        botMetaData.description = (await traitio.promptBot("GenerateYourDescription", botMetaData))[0];
     } catch (error) {
 
         console.log(error);
@@ -75,8 +64,9 @@ module.exports = async function (context, tartistSbMsg) {
 
     //generate Avatar
     try {
-        const avatarPathsOnBot = await promptBot("GetAvatar", botMetaData); //Will return file path local to the bot
-        botMetaData.image = "ipfs://" + (await promptBot("PinFilesToIpfs", botMetaData, { "Files": avatarPathsOnBot.join() }))[0]; //TraitHttpIO will return an IPFS CID
+        //@todo would like to pass in the bot description when creating the avatar. Not sure how windows shell will handle the long prompt.
+        const avatarPathsOnBot = await traitio.promptBot("GetAvatar", botMetaData); //Will return file path local to the bot
+        botMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", botMetaData, { "Files": avatarPathsOnBot.join() }))[0]; //TraitHttpIO will return an IPFS CID
     } catch (error) {
         console.log(error);
         throw error;

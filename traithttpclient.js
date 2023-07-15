@@ -21,4 +21,17 @@ const getTraitAi = (command, contextParams) => {
         return JSON.parse(response.data.BotResponse.trim());
     });
 };
-module.exports = { postTraitAi, getTraitAi };
+
+const promptBot = (prompt, metaData, contextParams) => {
+    if (!contextParams) {
+        contextParams = {};
+    }
+    contextParams["prompt"] = prompt;
+    return postTraitAi("prompt_bot", contextParams, {
+        bot_metadata: metaData
+    }).then(function (response) {
+        return response;
+    });
+};
+
+module.exports = { postTraitAi, getTraitAi, promptBot };

@@ -14,7 +14,6 @@ module.exports = async function (context, myTimer) {
     const nft = require("../nft");
     const enqueueTokenEvents = async (contractJsonFile, newTokenUri, queueConnectionString, queueName) => {
         const tokenToQueueContract = await nft.getContract(contractJsonFile);
-        const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
         const totalSupply = parseInt(await tokenToQueueContract.methods.totalSupply().call());
         const queueMessages = [];
 
@@ -60,6 +59,7 @@ module.exports = async function (context, myTimer) {
         //lets mark them on the block chain as being in process
         //doing syncronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
+        const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
         }
