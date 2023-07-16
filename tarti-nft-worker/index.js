@@ -12,6 +12,8 @@ module.exports = async function (context, tartiSbMsg) {
     if (!tartistMetadata) {
         throw new Error("Cannot load Tartist to generate Tarti");
     }
+    //@todo check if the tarti has already been created!
+
     //generate metadata with some place holders
     const metaAttributes = [];
     metaAttributes.push({
