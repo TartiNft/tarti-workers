@@ -78,7 +78,11 @@ module.exports = async function (context, tartistSbMsg) {
         const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
         const authResult = await pinata.testAuthentication();
         //if authResult checkauth
-        const pinResponse = await pinata.pinJSONToIPFS(botMetaData);
+        const pinResponse = await pinata.pinJSONToIPFS(botMetaData, {
+            pinataMetadata: {
+                name: `${botMetaData.name.replace(/[^\x00-\x7F]/g, "-")}-metadata.json`
+            }
+        });
         const metaDataFileHash = pinResponse.IpfsHash;
 
         //update the tokenuri on ethereum

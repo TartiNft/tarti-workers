@@ -83,7 +83,11 @@ module.exports = async function (context, tartiSbMsg) {
         const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
         const authResult = await pinata.testAuthentication();
         //if authResult checkauth
-        const pinResponse = await pinata.pinJSONToIPFS(tartiMetaData);
+        const pinResponse = await pinata.pinJSONToIPFS(tartiMetaData, {
+            pinataMetadata: {
+                name: `${tartiMetaData.name.replace(/[^\x00-\x7F]/g, "-")}-metadata.json`
+            }
+        });
         const metaDataFileHash = pinResponse.IpfsHash;
 
         //update the tokenuri on ethereum
@@ -105,7 +109,7 @@ async function downloadFileToMemory(url) {
 
 function convertIpfsToWeb2GatewayUri(uri) {
     if (uri.substr(0, 7) == "ipfs://") {
-        uri = "http://ipfs.io/ipfs/" + uri.substr(7);
+        uri = `${process.env.IPFS_GATEWAY}/${uri.substr(7)}`;
     }
     return uri;
 }
