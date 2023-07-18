@@ -85,7 +85,7 @@ module.exports = async function (context, tartiSbMsg) {
         //if authResult checkauth
         const pinResponse = await pinata.pinJSONToIPFS(tartiMetaData, {
             pinataMetadata: {
-                name: `${tartiMetaData.name.replace(/[^\x00-\x7F]/g, "-")}-metadata.json`
+                name: `${tartiMetaData.name.replace(/[^\x00-\x7F]|\s/g, "-")}-metadata.json`
             }
         });
         const metaDataFileHash = pinResponse.IpfsHash;
