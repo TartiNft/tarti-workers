@@ -58,7 +58,9 @@ module.exports = async function (context, tartiSbMsg) {
         //generate beat package from MakeBeat which includes most of what we need from Trait API
         //@todo consider breaking out the titling, videos, images etc from the actual beat making.
         const beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata));
-
+        if ((typeof beatInfo !== 'object') || !beatInfo["title"]) {
+            throw new Error("Invalid response from Trait AI when trying to make beat: " + beatInfo);
+        }
         tartiMetaData.name = beatInfo["title"];
         const mp3PathOnBot = beatInfo["mp3"];
         const tracksImagePathOnBot = beatInfo["png"];
