@@ -66,7 +66,7 @@ module.exports = async function (context, tartistSbMsg) {
     try {
         //@todo would like to pass in the bot description when creating the avatar. Not sure how windows shell will handle the long prompt.
         const avatarPathsOnBot = await traitio.promptBot("GetAvatar", botMetaData); //Will return file path local to the bot
-        botMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", botMetaData, { "Files": avatarPathsOnBot.join() }))[0]; //TraitHttpIO will return an IPFS CID
+        botMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", botMetaData, { "Files*": avatarPathsOnBot.join() }))[0]; //TraitHttpIO will return an IPFS CID
     } catch (error) {
         console.log(error);
         throw error;
@@ -86,7 +86,7 @@ module.exports = async function (context, tartistSbMsg) {
         const metaDataFileHash = pinResponse.IpfsHash;
 
         //update the tokenuri on ethereum
-        tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false).send({ from: nft.web3.eth.accounts.wallet[0].address });
+        await tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false).send({ from: nft.web3.eth.accounts.wallet[0].address });
         context.log(`Metadata hash: ${metaDataFileHash}`);
     } catch (error) {
         context.log(error);

@@ -39,7 +39,11 @@ module.exports = async function (context, tartiSbMsg) {
     let retryCount = 0;
     let beatInfo;
     while (retryCount < 3) {
-        beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata));
+        try {
+            beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata));
+        } catch (error) {
+            console.log(`Triggering retry ${retryCount}, Could not make beat due to ${error}`);
+        }
         if ((typeof beatInfo === 'object') && beatInfo["title"]) {
             break;
         }
@@ -60,11 +64,17 @@ module.exports = async function (context, tartiSbMsg) {
                 "trait_type": "birthday",
                 "display_type": "date",
                 "value": Math.floor(Date.now() / 1000)
+            },
+            {
+                "trait_type": "TracksImage",
+                "value": "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["png"] }))[0]
             }
         ]
     }
-    tartiMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files": beatInfo["png"] }))[0]; //TraitHttpIO will return an IPFS CID
-    tartiMetaData.animation_url = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files": beatInfo["mp3"] }))[0]; //TraitHttpIO will return an IPFS CID
+    //generate an image for this song
+    const songImageFileLocalToTrait = (await traitio.promptBot("GenerateSongImage", tartistMetadata, tartiMetaData))[0];
+    tartiMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": songImageFileLocalToTrait }))[0]; //TraitHttpIO will return an IPFS CID
+    tartiMetaData.animation_url = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["mp3"] }))[0]; //TraitHttpIO will return an IPFS CID
     tartiMetaData.external_url = `http//tartiart.com/tarti/${tokenId}`;
 
     //Pin Tarti metadata to IPFS usaing Pinata
@@ -79,7 +89,7 @@ module.exports = async function (context, tartiSbMsg) {
     const metaDataFileHash = pinResponse.IpfsHash;
 
     //Update the Tarti's TokenURI to be that of the new Metadata
-    tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true).send({ from: nft.web3.eth.accounts.wallet[0].address });
+    await tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true).send({ from: nft.web3.eth.accounts.wallet[0].address });
 
     context.log(`Tarti ${tokenId} created, metadata hash: ${metaDataFileHash}`);
 
