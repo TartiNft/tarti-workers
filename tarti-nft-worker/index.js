@@ -28,7 +28,7 @@ module.exports = async function (context, tartiSbMsg) {
     const tartistUrl = convertIpfsToWeb2GatewayUri(await tartistContract.methods.tokenURI(tartistId).call());
     const tartistMetadata = await downloadFileToMemory(tartistUrl);
     if (!tartistMetadata) {
-        throw new Error("Cannot load Tartist to generate Tarti");
+        throw new Error(`Cannot load Tartist ${tartistUrl} to generate Tarti`);
     }
 
     //Generate beat package from MakeBeat which includes most of what we need from Trait API
