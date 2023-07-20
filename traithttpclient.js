@@ -18,7 +18,7 @@ const postTraitAi = (command, contextParams, body) => {
             const parsedResponse = JSON.parse(parsedResponseString);
             return parsedResponse;
         } catch (error) {
-            throw new Error("Invalid response from Trait AI: " + parsedResponse);
+            throw new Error("Invalid response from Trait AI: " + parsedResponseString);
         }
     });
 };
