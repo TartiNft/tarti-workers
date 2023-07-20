@@ -33,6 +33,7 @@ module.exports = async function (context, tartiSbMsg) {
 
     //Generate beat package by invoking MakeBeat on the specified TARTIST.
     //The response will include most of what we need for the metadata.
+    //If the call fails for some reason, its often intermittent (bad key, bad rhythm, etc), so we will try 3 times.
     //@todo consider breaking out the titling, videos, images etc from the actual beat making.
     const traitio = require("../traithttpclient");
     let retryCount = 0;
