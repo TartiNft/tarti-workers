@@ -15,6 +15,8 @@
  */
 module.exports = async function (context, tartiSbMsg) {
 
+    context.log(`Processing queued Tarti ${tartiSbMsg}...`);
+
     //Get smart contract definitions
     const nft = require("../nft");
     const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
