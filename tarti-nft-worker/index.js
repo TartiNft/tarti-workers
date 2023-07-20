@@ -22,7 +22,7 @@ module.exports = async function (context, tartiSbMsg) {
     const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
     const tartiContract = await nft.getContract(__dirname + "/../contracts/Tarti.json");
 
-    //Get info about the Tartist
+    //Get info about the Tartist, which is needed for the next block to generate the beat
     const tokenId = parseInt(tartiSbMsg);
     const tartistId = await tartiContract.methods.artCreators(tokenId).call();
     const tartistUrl = convertIpfsToWeb2GatewayUri(await tartistContract.methods.tokenURI(tartistId).call());
@@ -31,7 +31,8 @@ module.exports = async function (context, tartiSbMsg) {
         throw new Error(`Cannot load Tartist ${tartistUrl} to generate Tarti`);
     }
 
-    //Generate beat package from MakeBeat which includes most of what we need from Trait API
+    //Generate beat package by invoking MakeBeat on the specified TARTIST.
+    //The response will include most of what we need for the metadata.
     //@todo consider breaking out the titling, videos, images etc from the actual beat making.
     const traitio = require("../traithttpclient");
     let retryCount = 0;
