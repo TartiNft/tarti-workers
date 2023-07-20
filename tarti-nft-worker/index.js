@@ -102,8 +102,8 @@ module.exports = async function (context, tartiSbMsg) {
      * @returns 
      */
     function convertIpfsToWeb2GatewayUri(uri) {
-        if (uri.substr(0, 7) == "ipfs://") {
-            uri = `${process.env.IPFS_GATEWAY}/${uri.substr(7)}`;
+        if (uri.substring(0, 7) == "ipfs://") {
+            uri = `${process.env.IPFS_GATEWAY}/${uri.substring(7)}`;
         }
         return uri;
     }
