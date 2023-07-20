@@ -85,7 +85,7 @@ module.exports = async function (context, tartiSbMsg) {
      * Get the resource at the specified url
      * 
      * @param {string} url 
-     * @returns {string} The contents of the retrived resource
+     * @returns {Promise<string>} The contents of the retrived resource
      */
     async function downloadFileToMemory(url) {
         const axios = require('axios');
