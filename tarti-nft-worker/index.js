@@ -1,8 +1,14 @@
 /**
- * - Dequeue Tarti mint events from the service bus
- * - Use offchain service to ask bot to create the media
- * - Create and pin NFT metadata for Tarti to IPFS
- * @todo check if the tarti has already been created!
+ * This function will invoke a TraitAI bot to create the TARTI media
+ * and make related updates to the blockchain record.
+ * 
+ * Steps
+ * 1. Dequeue Tarti mint events from the service bus
+ * 2. Use offchain service to ask bot to create the media
+ * 3. Create and pin NFT metadata for Tarti to IPFS
+ * 4. Update the TokenURI for the Tarti
+ * 
+ * @todo First check if the tarti has already been created!
  * 
  * @param {object} context 
  * @param {string} tartiSbMsg 
@@ -73,12 +79,24 @@ module.exports = async function (context, tartiSbMsg) {
 
     context.log(`Tarti ${tokenId} created, metadata hash: ${metaDataFileHash}`);
 
+    /**
+     * Get the resource at the specified url
+     * 
+     * @param {string} url 
+     * @returns {string} The contents of the retrived resource
+     */
     async function downloadFileToMemory(url) {
         const axios = require('axios');
         const response = await axios.get(url);
         return response.data;
     }
 
+    /**
+     * Convert an IPFS URI to a web2 URI using the IPFS_GATEWAY in the environment
+     * 
+     * @param {string} uri 
+     * @returns 
+     */
     function convertIpfsToWeb2GatewayUri(uri) {
         if (uri.substr(0, 7) == "ipfs://") {
             uri = `${process.env.IPFS_GATEWAY}/${uri.substr(7)}`;
