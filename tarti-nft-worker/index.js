@@ -42,7 +42,7 @@ module.exports = async function (context, tartiSbMsg) {
         try {
             beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata));
         } catch (error) {
-            console.log(`Triggering retry ${retryCount}, Could not make beat due to ${error}`);
+            context.log(`Triggering retry ${retryCount}, Could not make beat due to ${error}`);
         }
         if ((typeof beatInfo === 'object') && beatInfo["title"]) {
             break;
