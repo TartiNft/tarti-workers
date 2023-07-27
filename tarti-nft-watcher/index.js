@@ -1,6 +1,6 @@
 module.exports = async function (context, myTimer) {
     var timeStamp = new Date().toISOString();
-    context.log('JavaScript is running');
+    context.log('tarti-nft-watcher is running');
     if (myTimer.isPastDue) {
         context.log('late!');
     }
@@ -102,5 +102,5 @@ module.exports = async function (context, myTimer) {
         process.env['TARTI_QUEUE_NAME']
     );
 
-    context.log('JavaScript timer trigger function ran!', timeStamp);
+    context.log('tarti-nft-watcher ran!', timeStamp);
 };
