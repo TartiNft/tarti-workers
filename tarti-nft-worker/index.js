@@ -26,8 +26,8 @@ module.exports = async function (context, tartiSbMsg) {
     const tokenId = parseInt(tartiSbMsg);
 
     //If same user is minting too much on testnet for free, then ignore the minting.
-    //For now lets just limit each user to a max of 10 total songs.
-    if (nft.usingTestnet() && (await tartiContract.methods.balanceOf(tartiContract.methods.ownerOf(tokenId))) >= 10) {
+    //For now lets just limit each user to a max of 5 total songs.
+    if (nft.usingTestnet() && (await tartiContract.methods.balanceOf(tartiContract.methods.ownerOf(tokenId))) >= 5) {
         context.log('User has reached their TARTI minting limit on Testnet', tartiSbMsg);
         return;
     }
