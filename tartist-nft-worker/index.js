@@ -13,6 +13,13 @@ module.exports = async function (context, tartistSbMsg) {
         return;
     }
 
+    //Once 50 bots are minted, only owner can mint anymore.
+    if (nft.usingTestnet() && (await tartistContract.methods.totalSupply() >= 50)) {
+        context.log('Temporarily, no more TARTISTs on Testnet will be created', tartistSbMsg);
+        return;
+    }
+
+
     //Get bot info from the blockchain
     const tokenId = parseInt(tartistSbMsg);
     const traits = await tartistContract.methods.getTraits(tokenId).call();
