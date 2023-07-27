@@ -22,8 +22,23 @@ module.exports = async function (context, tartiSbMsg) {
     const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
     const tartiContract = await nft.getContract(__dirname + "/../contracts/Tarti.json");
 
-    //Get info about the Tartist, which is needed for the next block to generate the beat
+    //Get the Tarti tokenId, needed in several places
     const tokenId = parseInt(tartiSbMsg);
+
+    //If same user is minting too much on testnet for free, then ignore the minting.
+    //For now lets just limit each user to a max of 5 total songs.
+    if (nft.usingTestnet() && (await tartiContract.methods.balanceOf(tartiContract.methods.ownerOf(tokenId))) >= 5) {
+        context.log('User has reached their TARTI minting limit on Testnet', tartiSbMsg);
+        return;
+    }
+
+    //Once 50 songs are minted, only owner can mint anymore.
+    if (nft.usingTestnet() && (await tartiContract.methods.totalSupply() >= 50)) {
+        context.log('Temporarily, no more TARTIs on Testnet will be created', tartiSbMsg);
+        return;
+    }
+
+    //Get info about the Tartist, which is needed for the next block to generate the beat
     const tartistId = await tartiContract.methods.artCreators(tokenId).call();
     const tartistUrl = convertIpfsToWeb2GatewayUri(await tartistContract.methods.tokenURI(tartistId).call());
     const tartistMetadata = await downloadFileToMemory(tartistUrl);

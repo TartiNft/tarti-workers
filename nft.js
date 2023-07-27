@@ -15,4 +15,8 @@ const getContract = async (contractJsonFile) => {
     );
 };
 
-module.exports = { web3, getContract };
+const usingTestnet = async () => {
+    return (await web3.eth.net.getId()) !== 1;
+};
+
+module.exports = { web3, getContract, usingTestnet };
