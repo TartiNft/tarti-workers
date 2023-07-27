@@ -1,4 +1,7 @@
 module.exports = async function (context, tartistSbMsg) {
+
+    context.log('TartiWorker received message', tartistSbMsg);
+
     //Get bot info from the blockchain
     const nft = require("../nft");
     const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
@@ -70,5 +73,5 @@ module.exports = async function (context, tartistSbMsg) {
         throw error;
     }
 
-    context.log('JavaScript ServiceBus queue trigger function processed message', tartistSbMsg);
+    context.log('TartiWorker processed message', tartistSbMsg);
 };
