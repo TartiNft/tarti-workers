@@ -82,7 +82,7 @@ module.exports = async function (context, myTimer) {
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
         const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
-            await tartistContract.methods.setCreationStarted(uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address).send({ from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] })
+            await nft.sendContractTx(context, tartistContract, "setCreationStarted", [uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address]);
         }
     };
 
