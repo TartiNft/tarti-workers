@@ -26,6 +26,7 @@ const usingTestnet = async () => {
 const sendContractTx = async (context, contract, methodName, methodArgs) => {
     var latestblock = await web3.eth.getBlock("latest");
     const threeGwei = web3.utils.toWei(3, "gwei");
+    const eightGwei = web3.utils.toWei(8, "gwei");
     const bigTwo = web3.utils.toBigInt(2);
     const bigten = web3.utils.toBigInt(10);
     const latestGasLimit = latestblock.gasLimit;
@@ -36,6 +37,10 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
 
     if (tip < threeGwei) {
         tip = threeGwei;
+    }
+    if (tip > eightGwei) {
+        context.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
+        return false;
     }
     if (baseFee < tip) {
         baseFee = tip;
