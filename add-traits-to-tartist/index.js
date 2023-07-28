@@ -22,34 +22,36 @@ module.exports = async function (context, myTimer) {
   //Go through all traits and add any that dont exist already.
   context.log("Get all traits from TraitIO...");
   const allTraits = await traitio.getTraitAi("trait_files");
-  context.log("Get next trait id...");
-  let nextTraitId = existingTraits.length + 1;
 
-  context.log("Go through traits...");
-  //Only do up to ten traits per invocation. I don't want to run out of time.
-  for (var i = 0; i < Math.min(allTraits.length, 10); i++) {
+  //Make a list of traits that havent been added yet
+  const newTraits = [];
+  for (var i = 0; i < allTraits.length; i++) {
     const traitProps = await traitio.getTraitAi("needed_birth_values", { trait: allTraits[i] });
-
-    //Add to the contract
-    context.log(`Add trait ${allTraits[i]} to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
     if (traitProps.length > 1) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
         if (!existingTraits.includes(traitAndPropName)) {
-          if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, traitAndPropName]) === false) {
-            context.log("Skipped adding traits with props");
-            return;
-          }
-          nextTraitId++;
+          newTraits.push(traitAndPropName);
         }
       }
     } else if (!existingTraits.includes(allTraits[i])) {
-      if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, allTraits[i]]) === false) {
-        context.log("Skipped adding traits");
-        return;
-      }
-      nextTraitId++;
+      newTraits.push(allTraits[i]);
     }
+  }
+
+  context.log("Get next trait id...");
+  let nextTraitId = existingTraits.length + 1;
+
+  context.log("Go through traits...");
+  //Only do up to ten traits per invocation
+  for (var i = 0; i < Math.min(newTraits.length, 10); i++) {
+    //Add to the contract
+    context.log(`Add trait ${allTraits[i]} to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
+    if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, allTraits[i]]) === false) {
+      context.log("Skipped adding traits");
+      return;
+    }
+    nextTraitId++;
   };
 
   context.log('add-traits-to-tartist ran!', timeStamp);
