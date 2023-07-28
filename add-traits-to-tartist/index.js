@@ -36,7 +36,7 @@ module.exports = async function (context, myTimer) {
     const traitProps = await traitio.getTraitAi("needed_birth_values", { trait: allTraits[i] });
 
     //add to the contract
-    context.log("Add trait to the contract...");
+    context.log(`Add trait to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
     if (traitProps.length > 1) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
