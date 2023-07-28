@@ -11,7 +11,6 @@ module.exports = async function (context, myTimer) {
   const traitio = require("../traithttpclient");
   const contract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
 
-  //get existing traits
   context.log("Get existing traits...");
   const existingTraitIds = await contract.methods.getAllTraits().call();
   const existingTraits = [];
@@ -20,18 +19,19 @@ module.exports = async function (context, myTimer) {
     if (existingTrait) existingTraits.push(existingTrait);
   }
 
-  //go through all traits and add any that dont exist already
+  //Go through all traits and add any that dont exist already.
   context.log("Get all traits from TraitIO...");
   const allTraits = await traitio.getTraitAi("trait_files");
   context.log("Get next trait id...");
   let nextTraitId = existingTraits.length + 1;
 
   context.log("Go through traits...");
-  for (var i = 0; i < allTraits.length; i++) {
+  //Only do up to ten traits per invocation. I don't want to run out of time.
+  for (var i = 0; i < Math.min(allTraits.length, 10); i++) {
     const traitProps = await traitio.getTraitAi("needed_birth_values", { trait: allTraits[i] });
 
-    //add to the contract
-    context.log(`Add trait to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
+    //Add to the contract
+    context.log(`Add trait ${allTraits[i]} to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
     if (traitProps.length > 1) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
