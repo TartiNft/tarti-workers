@@ -41,11 +41,13 @@ module.exports = async function (context, myTimer) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
         if (!existingTraits.includes(traitAndPropName)) {
+          context.log(`addTrait and Prop ${nextTraitId} ${traitAndPropName}`);
           await contract.methods.addTrait(nextTraitId, traitAndPropName).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
           nextTraitId++;
         }
       }
     } else if (!existingTraits.includes(allTraits[i])) {
+      context.log(`addTrait ${nextTraitId} ${allTraits[i]}`);
       await contract.methods.addTrait(nextTraitId, allTraits[i]).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
       nextTraitId++;
     }
