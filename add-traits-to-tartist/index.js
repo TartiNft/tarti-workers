@@ -36,7 +36,6 @@ module.exports = async function (context, myTimer) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
         if (!existingTraits.includes(traitAndPropName)) {
-          context.log(`addTrait and Prop ${nextTraitId} ${traitAndPropName}, gas limit: ${latestGasLimit}`);
           if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, traitAndPropName]) === false) {
             context.log("Skipped adding traits with props");
             return;
