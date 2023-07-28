@@ -21,10 +21,16 @@ module.exports = async function (context, myTimer) {
   }
 
   //go through all traits and add any that dont exist already
-  context.log("Go through traits and add new ones...");
+  context.log("Get all traits from TraitIO...");
   const allTraits = await traitio.getTraitAi("trait_files");
+
+  context.log("Get gas limit...");
   const latestGasLimit = (await nft.web3.eth.getBlock("latest")).gasLimit;
+
+  context.log("Get next trait id...");
   let nextTraitId = existingTraits.length + 1;
+
+  context.log("Go through traits...");
   for (var i = 0; i < allTraits.length; i++) {
     //get trait props
     const traitProps = await traitio.getTraitAi("needed_birth_values", { trait: allTraits[i] });
@@ -35,12 +41,12 @@ module.exports = async function (context, myTimer) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
         if (!existingTraits.includes(traitAndPropName)) {
-          await contract.methods.addTrait(nextTraitId, traitAndPropName).send({ gas: latestGasLimit, from: nft.web3.eth.accounts.wallet[0].address });
+          await contract.methods.addTrait(nextTraitId, traitAndPropName).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
           nextTraitId++;
         }
       }
     } else if (!existingTraits.includes(allTraits[i])) {
-      await contract.methods.addTrait(nextTraitId, allTraits[i]).send({ gas: latestGasLimit, from: nft.web3.eth.accounts.wallet[0].address });
+      await contract.methods.addTrait(nextTraitId, allTraits[i]).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
       nextTraitId++;
     }
   };
