@@ -1,18 +1,18 @@
 module.exports = async function (context, myTimer) {
-  var timeStamp = new Date().toISOString();
+  context.log('add-trait-to-tartist is starting...');
 
-  context.info('add-trait-to-tartist is starting...');
+  var timeStamp = new Date().toISOString();
   if (myTimer.isPastDue) {
-    context.info('Late!');
+    context.log('Late!');
   }
 
-  context.trace("Loading Tartist contract...");
+  context.log("Loading Tartist contract...");
   const nft = require("../nft");
   const traitio = require("../traithttpclient");
   const contract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
 
   //get existing traits
-  context.trace("Get existing traits...");
+  context.log("Get existing traits...");
   const existingTraitIds = await contract.methods.getAllTraits().call();
   const existingTraits = [];
   for (const existingTraitId of existingTraitIds) {
@@ -21,7 +21,7 @@ module.exports = async function (context, myTimer) {
   }
 
   //go through all traits and add any that dont exist already
-  context.trace("Go through traits and add new ones...");
+  context.log("Go through traits and add new ones...");
   const allTraits = await traitio.getTraitAi("trait_files");
   const latestGasLimit = (await nft.web3.eth.getBlock("latest")).gasLimit;
   let nextTraitId = existingTraits.length + 1;
@@ -30,7 +30,7 @@ module.exports = async function (context, myTimer) {
     const traitProps = await traitio.getTraitAi("needed_birth_values", { trait: allTraits[i] });
 
     //add to the contract
-    context.trace("Add trait to the contract...");
+    context.log("Add trait to the contract...");
     if (traitProps.length > 1) {
       for (const traitProp of traitProps) {
         const traitAndPropName = `${allTraits[i]}.${traitProp}`;
@@ -45,5 +45,5 @@ module.exports = async function (context, myTimer) {
     }
   };
 
-  context.info('JavaScript timer trigger function ran!', timeStamp);
+  context.log('add-traits-to-tartist ran!', timeStamp);
 };
