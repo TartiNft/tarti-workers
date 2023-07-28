@@ -48,7 +48,12 @@ module.exports = async function (context, myTimer) {
       }
     } else if (!existingTraits.includes(allTraits[i])) {
       context.log(`addTrait ${nextTraitId} ${allTraits[i]}, gas limit: ${latestGasLimit}`);
-      await contract.methods.addTrait(nextTraitId, allTraits[i]).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
+      try {
+        await contract.methods.addTrait(nextTraitId, allTraits[i]).send({ gas: latestGasLimit, from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'] });
+      } catch (error) {
+        context.log(error);
+        throw (error);
+      }
       nextTraitId++;
     }
   };
