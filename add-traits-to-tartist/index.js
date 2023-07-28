@@ -46,8 +46,8 @@ module.exports = async function (context, myTimer) {
   //Only do up to ten traits per invocation
   for (var i = 0; i < Math.min(newTraits.length, 10); i++) {
     //Add to the contract
-    context.log(`Add trait ${allTraits[i]} to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
-    if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, allTraits[i]]) === false) {
+    context.log(`Add trait ${newTraits[i]} to the contract wallet address and dblcheck ${nft.web3.eth.accounts.wallet[0].address}, ${process.env['CONTRACT_OWNER_WALLET_ADDRESS']}...`);
+    if (await nft.sendContractTx(context, contract, "addTrait", [nextTraitId, newTraits[i]]) === false) {
       context.log("Skipped adding traits");
       return;
     }
