@@ -27,12 +27,18 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     var latestblock = await web3.eth.getBlock("latest");
     const threeGwei = web3.utils.toWei(3, "gwei");
     const eightGwei = web3.utils.toWei(8, "gwei");
+    const bigZero = web3.utils.toBigInt(0);
     const bigTwo = web3.utils.toBigInt(2);
     const bigten = web3.utils.toBigInt(10);
     const latestGasLimit = latestblock.gasLimit;
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [25, 50, 75, 95]);
-    const recentHighTip = web3.utils.toBigInt(feeHistory.reward[0][3]);
-    let tip = recentHighTip * bigTwo;
+    const feeHistory = await web3.eth.getFeeHistory(4, "safe", [25, 50, 75]);
+
+    const midTipSum = feeHistory.reward.reduce((accumulated, reward) => accumulated + web3.utils.toBigInt(reward[1]), bigZero);
+    const getUsedRatio = feeHistory.gasUsedRatio[0];
+
+    const recentAvgTip = web3.utils.toBigInt(midTipSum / web3.utils.toBigInt(feeHistory.reward.length));
+
+    let tip = recentAvgTip * bigTwo;
     let baseFee = latestblock.baseFeePerGas + bigten;
 
     if (tip < threeGwei) {
