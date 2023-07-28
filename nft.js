@@ -56,11 +56,13 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
         type: '0x2',
         maxFeePerGas: maxFee,
         maxPriorityFeePerGas: tip,
-        gas: latestGasLimit,
         from: process.env['CONTRACT_OWNER_WALLET_ADDRESS']
     };
+    const methodDef = contract.methods[methodName](...methodArgs);
+    const estimatedGas = await methodDef.estimateGas();
+    txOptions["gas"] = estimatedGas + (estimatedGas / bigten); //latestGasLimit;
 
-    return await contract.methods[methodName](...methodArgs).send(txOptions);
+    return await methodDef.send(txOptions);
 };
 
 module.exports = { web3, getContract, usingTestnet, sendContractTx };
