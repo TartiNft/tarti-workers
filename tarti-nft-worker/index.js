@@ -104,7 +104,7 @@ module.exports = async function (context, tartiSbMsg) {
     const metaDataFileHash = pinResponse.IpfsHash;
 
     //Update the Tarti's TokenURI to be that of the new Metadata
-    await tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true).send({ from: nft.web3.eth.accounts.wallet[0].address });
+    await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true]);
 
     context.log(`Tarti ${tokenId} created, metadata hash: ${metaDataFileHash}`);
 

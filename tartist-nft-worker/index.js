@@ -82,7 +82,7 @@ module.exports = async function (context, tartistSbMsg) {
 
         //Update the TokenURI for the bot on the TARTIST contract
         const metaDataFileHash = pinResponse.IpfsHash;
-        await tartistContract.methods.setCreated(tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false).send({ from: nft.web3.eth.accounts.wallet[0].address });
+        await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
         context.log(`Metadata hash: ${metaDataFileHash}`);
     } catch (error) {
         context.log(error);
