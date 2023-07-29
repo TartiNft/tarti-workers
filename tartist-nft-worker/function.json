@@ -4,7 +4,7 @@
       "name": "tartistSbMsg",
       "type": "serviceBusTrigger",
       "direction": "in",
-      "queueName": "TARTIST_QUEUE_NAME",
+      "queueName": "%TARTIST_QUEUE_NAME%",
       "connection": "TARTIST_QUEUE_CONNECTION_STRING"
     }
   ]
