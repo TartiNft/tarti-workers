@@ -1,6 +1,6 @@
 module.exports = async function (context, tartistSbMsg) {
 
-    context.log('TartiWorker received message', tartistSbMsg);
+    context.log('Tartist Worker received message', tartistSbMsg);
 
     //Load the Tartist contract interface
     const nft = require("../nft");
@@ -8,6 +8,7 @@ module.exports = async function (context, tartistSbMsg) {
 
     //If same user is minting too much on testnet for free, then ignore the minting.
     //For now lets just limit each user to a max of 6 bots.
+    const tokenId = parseInt(tartistSbMsg);
     if (nft.usingTestnet() && (await tartistContract.methods.balanceOf(tartistContract.methods.ownerOf(tokenId))) >= 6) {
         context.log('User has reached their TARTIST minting limit on Testnet', tartistSbMsg);
         return;
@@ -21,7 +22,6 @@ module.exports = async function (context, tartistSbMsg) {
 
 
     //Get bot info from the blockchain
-    const tokenId = parseInt(tartistSbMsg);
     const traits = await tartistContract.methods.getTraits(tokenId).call();
     const traitDynValues = await tartistContract.methods.getTraitValues(tokenId).call();
     const botTraitDominances = await tartistContract.methods.getTraitDominances(tokenId).call();
