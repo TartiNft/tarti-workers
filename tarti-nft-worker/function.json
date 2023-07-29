@@ -4,7 +4,7 @@
       "name": "tartiSbMsg",
       "type": "serviceBusTrigger",
       "direction": "in",
-      "queueName": "tarti-nft-events-dev",
+      "queueName": "TARTI_QUEUE_NAME",
       "connection": "TARTI_QUEUE_CONNECTION_STRING"
     }
   ]

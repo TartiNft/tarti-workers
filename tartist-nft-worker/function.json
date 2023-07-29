@@ -4,7 +4,7 @@
       "name": "tartistSbMsg",
       "type": "serviceBusTrigger",
       "direction": "in",
-      "queueName": "tartist-nft-events-dev",
+      "queueName": "TARTIST_QUEUE_NAME",
       "connection": "TARTIST_QUEUE_CONNECTION_STRING"
     }
   ]
