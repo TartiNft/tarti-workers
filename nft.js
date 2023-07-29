@@ -29,17 +29,13 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     const eightGwei = web3.utils.toWei(8, "gwei");
     const bigZero = web3.utils.toBigInt(0);
     const bigTwo = web3.utils.toBigInt(2);
-    const bigten = web3.utils.toBigInt(10);
+    const bigTen = web3.utils.toBigInt(10);
     const latestGasLimit = latestblock.gasLimit;
     const feeHistory = await web3.eth.getFeeHistory(4, "safe", [25, 50, 75]);
-
     const midTipSum = feeHistory.reward.reduce((accumulated, reward) => accumulated + web3.utils.toBigInt(reward[1]), bigZero);
-    const getUsedRatio = feeHistory.gasUsedRatio[0];
-
     const recentAvgTip = web3.utils.toBigInt(midTipSum / web3.utils.toBigInt(feeHistory.reward.length));
 
     let tip = recentAvgTip * bigTwo;
-    let baseFee = latestblock.baseFeePerGas + bigten;
 
     if (tip < threeGwei) {
         tip = threeGwei;
@@ -48,15 +44,12 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
         context.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
         return false;
     }
-    if (baseFee < tip) {
-        baseFee = tip;
-    }
 
-    const maxFee = tip + baseFee;
+    const maxFee = tip + latestblock.baseFeePerGas;
     const curNonce = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS']);
     const curNoncepending = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS'], 'pending');
 
-    context.log(`${methodName} ${methodArgs}, gas limit: ${latestGasLimit}`);
+    context.log(`${methodName} ${methodArgs}, tip: ${tip}, maxfee: ${maxFee}, gas limit: ${latestGasLimit}`);
 
     if (curNonce != curNoncepending) {
         context.log(`Can't be certain current nonce is correct. Transactions pending. Gonna wait to add traits. (nonces: ${curNonce}, ${curNoncepending})`);
@@ -65,14 +58,13 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
 
     const txOptions = {
         type: '0x2',
-        maxFeePerGas: maxFee,
         maxPriorityFeePerGas: tip,
-        from: process.env['CONTRACT_OWNER_WALLET_ADDRESS']
+        from: process.env['CONTRACT_OWNER_WALLET_ADDRESS'],
+        maxFeePerGas: maxFee,
     };
     const methodDef = contract.methods[methodName](...methodArgs);
     const estimatedGas = await methodDef.estimateGas();
-    txOptions["gas"] = estimatedGas + (estimatedGas / bigten); //latestGasLimit;
-
+    txOptions["gas"] = estimatedGas + (estimatedGas / bigTen); //latestGasLimit;
     return await methodDef.send(txOptions);
 };
 
