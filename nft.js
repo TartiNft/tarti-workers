@@ -30,7 +30,6 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     const bigZero = web3.utils.toBigInt(0);
     const bigTwo = web3.utils.toBigInt(2);
     const bigTen = web3.utils.toBigInt(10);
-    const latestGasLimit = latestblock.gasLimit;
     const feeHistory = await web3.eth.getFeeHistory(4, "safe", [25, 50, 75]);
     const midTipSum = feeHistory.reward.reduce((accumulated, reward) => accumulated + web3.utils.toBigInt(reward[1]), bigZero);
     const recentAvgTip = web3.utils.toBigInt(midTipSum / web3.utils.toBigInt(feeHistory.reward.length));
@@ -45,17 +44,14 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
         return false;
     }
 
-    const maxFee = tip + latestblock.baseFeePerGas;
     const curNonce = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS']);
     const curNoncepending = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS'], 'pending');
-
-    context.log(`${methodName} ${methodArgs}, tip: ${tip}, maxfee: ${maxFee}, gas limit: ${latestGasLimit}`);
-
     if (curNonce != curNoncepending) {
         context.log(`Can't be certain current nonce is correct. Transactions pending. Gonna wait to add traits. (nonces: ${curNonce}, ${curNoncepending})`);
         return false;
     }
 
+    const maxFee = tip + latestblock.baseFeePerGas;
     const txOptions = {
         type: '0x2',
         maxPriorityFeePerGas: tip,
@@ -64,7 +60,9 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     };
     const methodDef = contract.methods[methodName](...methodArgs);
     const estimatedGas = await methodDef.estimateGas();
-    txOptions["gas"] = estimatedGas + (estimatedGas / bigTen); //latestGasLimit;
+    txOptions["gas"] = estimatedGas + (estimatedGas / bigTen);
+
+    context.log(`${methodName} ${methodArgs}, tip: ${tip}, maxfee: ${maxFee}, gas limit: ${txOptions["gas"]}`);
     return await methodDef.send(txOptions);
 };
 
