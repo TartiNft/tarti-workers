@@ -9,13 +9,15 @@ module.exports = async function (context, tartistSbMsg) {
     //If same user is minting too much on testnet for free, then ignore the minting.
     //For now lets just limit each user to a max of 6 bots.
     const tokenId = parseInt(tartistSbMsg);
-    if (nft.usingTestnet() && (await tartistContract.methods.balanceOf(tartistContract.methods.ownerOf(tokenId))) >= 6) {
-        context.log('User has reached their TARTIST minting limit on Testnet', tartistSbMsg);
+    const tokenMinter = await tartistContract.methods.ownerOf(tokenId).call();
+    const minterTartistCount = await tartistContract.methods.balanceOf(tokenMinter).call();
+    if (nft.usingTestnet() && (minterTartistCount >= 6)) {
+        context.log('User has reached their TARTIST minting limit on this TestNet', tartistSbMsg);
         return;
     }
 
     //Once 50 bots are minted, only owner can mint anymore.
-    if (nft.usingTestnet() && (await tartistContract.methods.totalSupply() >= 50)) {
+    if (nft.usingTestnet() && ((await tartistContract.methods.totalSupply().call()) >= 50)) {
         context.log('Temporarily, no more TARTISTs on Testnet will be created', tartistSbMsg);
         return;
     }
