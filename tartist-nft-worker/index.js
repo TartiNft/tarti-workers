@@ -5,6 +5,15 @@ module.exports = async function (context, tartistSbMsg) {
     //Load the Tartist contract interface
     const nft = require("../nft");
     const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
+    const tartistInCreationUri = "ipfs://" + process.env["CREATING_TARTIST_METADATA_CID"];
+
+    //Check if this Tartist has already been created. If so, skip.
+    const tokenUri = (await tartistContract.methods.tokenURI(tokenId).call()).substring(0, tartistInCreationUri.length);
+    context.log(`Checking if ${tokenUri} is in the creating state ${tokenUri} == ${tartistInCreationUri}`)
+    if (tokenUri != tartistInCreationUri) {
+        return;
+    }
+
 
     //If same user is minting too much on testnet for free, then ignore the minting.
     //For now lets just limit each user to a max of 6 bots.
