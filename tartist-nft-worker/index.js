@@ -11,7 +11,7 @@ module.exports = async function (context, tartistSbMsg) {
     const tokenId = parseInt(tartistSbMsg);
     const tokenMinter = await tartistContract.methods.ownerOf(tokenId).call();
     const minterTartistCount = await tartistContract.methods.balanceOf(tokenMinter).call();
-    if (nft.usingTestnet() && (minterTartistCount >= 6)) {
+    if ((tokenMinter != process.env.CONTRACT_OWNER_WALLET_ADDRESS) && nft.usingTestnet() && (minterTartistCount >= 6)) {
         context.log('User has reached their TARTIST minting limit on this TestNet', tartistSbMsg);
         return;
     }

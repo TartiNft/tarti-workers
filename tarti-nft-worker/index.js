@@ -31,7 +31,7 @@ module.exports = async function (context, tartiSbMsg) {
     //We have a hard check at 50 in the next code block
     const tokenMinter = await tartiContract.methods.ownerOf(tokenId).call();
     const minterTartiCount = await tartiContract.methods.balanceOf(tokenMinter).call();
-    if (nft.usingTestnet() && (minterTartiCount >= 5)) {
+    if ((tokenMinter != process.env.CONTRACT_OWNER_WALLET_ADDRESS) && nft.usingTestnet() && (minterTartiCount >= 5)) {
         context.log('User has reached their TARTI minting limit on Testnet', tartiSbMsg);
         return;
     }
