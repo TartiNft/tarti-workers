@@ -52,7 +52,42 @@ module.exports = async function (context, myTimer) {
             return;
         }
 
-        //Send the uncreated token messages to the Service Bus Queue.
+        /**
+        We do two things here.
+        1) send message to service bus for the TartiWorker to pick up.
+        2) mark the nft in a creating state.
+        
+        The order of the two matters.
+        Issues this ordering comment is a reaction to: TARTI-122, TARTI-76, TARTI-124, TARTI-125
+
+        If we send the sb message first and then we fail on sending contract tx, then we end up sending
+        out a new service bus message every minute until the tx succeeds. This guarantees creation
+        but also causes potential overruns.
+        Other hand, if we send contract Tx first and the sb message fails, then the sb message will never be sent
+        and the worker never sees it. This means there is a chance the bot/song is never generated,
+        but it guarantess no overruns (or at least highly prevents it, without fancy locking).
+        We need to mimic a rdb style transaction where we can rollback if *either* fails.
+        or at least reduce chances as much as possible.
+
+        Here is what we went with, for now:
+
+        - We will do as much of the SB prep as possible, where most sb exceptions would normally occur.
+        - Send the contract Tx
+        - Send the Sb message
+        
+        This reduces the amount of operations that happen between the two, in turn reducing liklihood of exceptions 
+        between them. 
+        
+        @tbd FUTURE (Noted in TARTI-128):
+        1. Send the sb message
+        2. Send the contract Tx
+        3. If the contract tx fails, we can consume the Sb message ourselves, removing it from the queue.
+        In addition to this, we will enhance the workers to only operate on messages where the NFT
+        is in the `creating` state. So even if a Sb message gets queued, if the contract tx fails then the worker
+        will not work on it.
+         */
+
+        //Prep the Service Bus message batch
         const { ServiceBusClient } = require("@azure/service-bus");
         const sbClient = new ServiceBusClient(queueConnectionString);
         const sender = sbClient.createSender(queueName);
@@ -73,9 +108,6 @@ module.exports = async function (context, myTimer) {
                 }
             }
         }
-        await sender.sendMessages(batch);
-        await sender.close();
-        //@todo What happens if someone else reads the queued tokens at this moment, before we update the URI? Any concern?
 
         //Set the URI on the queued tokens so that we know they are no longer new.
         //@todo doing synchronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
@@ -84,6 +116,17 @@ module.exports = async function (context, myTimer) {
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             await nft.sendContractTx(context, tartistContract, "setCreationStarted", [uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address]);
         }
+
+        //Now that the tokens have been put into a "creation started" state,
+        //lets publish the message to the Service Bus queue so the workers
+        //will see them and start the work.
+        //NOTE: If this fails, then we will be in a bad state, because we will have set the state to Creation Started
+        //but we didnt start creation. And we will not return here because we already set the state to creating.
+        //No concept of "transactions" here between two separate services.
+        //So, we need to manually rollback on failure.
+        //@tbd TARTI-128
+        await sender.sendMessages(batch);
+        await sender.close();
     };
 
     context.log('Enqueue Tartist events');

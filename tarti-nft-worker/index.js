@@ -25,6 +25,14 @@ module.exports = async function (context, tartiSbMsg) {
     //Get the Tarti tokenId, needed in several places
     const tokenId = parseInt(tartiSbMsg);
 
+    //Check if this Tarti has already been created. If so, skip.
+    const tartiInCreationUri = "ipfs://" + process.env["CREATING_TARTI_METADATA_CID"];
+    const tartiTokenUri = (await tartiContract.methods.tokenURI(tokenId).call()).substring(0, tartiInCreationUri.length);
+    context.log(`Checking if Tarti ${tartiTokenUri} is in the creating state ${tartiTokenUri} == ${tartiInCreationUri}`)
+    if (tartiTokenUri != tartiInCreationUri) {
+        return;
+    }
+
     //If same user is minting too much on testnet for free, then ignore the minting.
     //For now lets just limit each user to a max of 5 total songs.
     //People can obv cheat with more wallets. But just a quick check. 
