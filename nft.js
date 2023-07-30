@@ -25,8 +25,8 @@ const usingTestnet = async () => {
 
 const sendContractTx = async (context, contract, methodName, methodArgs) => {
     var latestblock = await web3.eth.getBlock("latest");
-    const threeGwei = web3.utils.toWei(3, "gwei");
-    const eightGwei = web3.utils.toWei(8, "gwei");
+    const threeGwei = web3.utils.toBigInt(web3.utils.toWei(3, "gwei"));
+    const eightGwei = web3.utils.toBigInt(web3.utils.toWei(8, "gwei"));
     const bigZero = web3.utils.toBigInt(0);
     const bigTwo = web3.utils.toBigInt(2);
     const bigTen = web3.utils.toBigInt(10);
