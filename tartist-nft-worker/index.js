@@ -96,6 +96,7 @@ module.exports = async function (context, tartistSbMsg) {
         await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
         context.log(`Metadata hash: ${metaDataFileHash}`);
     } catch (error) {
+        //@tbd send notification that tartist failed to generate
         context.log(error);
         throw error;
     }
