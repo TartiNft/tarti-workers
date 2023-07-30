@@ -119,29 +119,29 @@ module.exports = async function (context, tartiSbMsg) {
     await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true]);
 
     context.log(`Tarti ${tokenId} created, metadata hash: ${metaDataFileHash}`);
-
-    /**
-     * Get the resource at the specified url
-     * 
-     * @param {string} url 
-     * @returns {Promise<string>} The contents of the retrived resource
-     */
-    async function downloadFileToMemory(url) {
-        const axios = require('axios');
-        const response = await axios.get(url);
-        return response.data;
-    }
-
-    /**
-     * Convert an IPFS URI to a web2 URI using the IPFS_GATEWAY in the environment
-     * 
-     * @param {string} uri 
-     * @returns 
-     */
-    function convertIpfsToWeb2GatewayUri(uri) {
-        if (uri.substring(0, 7) == "ipfs://") {
-            uri = `${process.env.IPFS_GATEWAY}/${uri.substring(7)}`;
-        }
-        return uri;
-    }
 };
+
+/**
+ * Get the resource at the specified url
+ * 
+ * @param {string} url 
+ * @returns {Promise<string>} The contents of the retrived resource
+ */
+async function downloadFileToMemory(url) {
+    const axios = require('axios');
+    const response = await axios.get(url);
+    return response.data;
+}
+
+/**
+ * Convert an IPFS URI to a web2 URI using the IPFS_GATEWAY in the environment
+ * 
+ * @param {string} uri 
+ * @returns 
+ */
+function convertIpfsToWeb2GatewayUri(uri) {
+    if (uri.substring(0, 7) == "ipfs://") {
+        uri = `${process.env.IPFS_GATEWAY}/${uri.substring(7)}`;
+    }
+    return uri;
+}
