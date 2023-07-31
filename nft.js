@@ -34,14 +34,21 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     const midTipSum = feeHistory.reward.reduce((accumulated, reward) => accumulated + web3.utils.toBigInt(reward[1]), bigZero);
     const recentAvgTip = web3.utils.toBigInt(midTipSum / web3.utils.toBigInt(feeHistory.reward.length));
 
-    let tip = recentAvgTip * bigTwo;
-
-    if (tip < threeGwei) {
-        tip = threeGwei;
-    }
-    if (tip > eightGwei) {
-        context.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
-        return false;
+    //When running locally in ganache, I am the only one tipping.
+    //As such, the most recent tip is mine, I double it, and then its too expensive forever :)
+    //So when local, lets just makde default tip and keep it moving.
+    let tip;
+    if (process.env["ETH_CLIENT_URL"].includes("127.0.0.1")) {
+        tip = web3.utils.toBigInt(web3.utils.toWei(1, "gwei"));
+    } else {
+        tip = recentAvgTip * bigTwo;
+        if (tip < threeGwei) {
+            tip = threeGwei;
+        }
+        if (tip > eightGwei) {
+            context.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
+            return false;
+        }
     }
 
     const curNonce = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS']);
