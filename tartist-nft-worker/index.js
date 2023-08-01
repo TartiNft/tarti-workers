@@ -48,18 +48,20 @@ module.exports = async function (context, tartistSbMsg) {
 
         const traitName = await tartistContract.methods.availableTraits(traits[traitIdx]).call();
 
-        if (traitDynValues[traitIdx]) {
-            metaAttributes.push({
-                "trait_type": traitName,
-                "value": traitDynValues[traitIdx],
-                "dominance": botTraitDominances[traitIdx]
-            });
+        if (traitName != "FileArchivist") { //hack for 0.2 where bots got minted with this invalid trait
+            if (traitDynValues[traitIdx]) {
+                metaAttributes.push({
+                    "trait_type": traitName,
+                    "value": traitDynValues[traitIdx],
+                    "dominance": botTraitDominances[traitIdx]
+                });
 
-        } else {
-            metaAttributes.push({
-                "value": traitName,
-                "dominance": botTraitDominances[traitIdx]
-            });
+            } else {
+                metaAttributes.push({
+                    "value": traitName,
+                    "dominance": botTraitDominances[traitIdx]
+                });
+            }
         }
     }
     const botMetaData = {
