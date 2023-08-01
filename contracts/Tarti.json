@@ -19907,8 +19907,8 @@
                 }
             },
             "links": {},
-            "address": "0x9DA6CCe8Aaf795d5BeAE8164A32CFee87812794d",
-            "transactionHash": "0x3d70783537e0f50299cd9008d3171ed1465699e4091e27e7381828a54855b199"
+            "address": "0x7EA8472aec0cC1cFD96458c48f5ACff1D6cEf0Bd",
+            "transactionHash": "0xd0b44c5e76268f145122d31e607a32f5e319cdd7b7019194756b2ede386fd9bc"
         },
         "11155111": {
             "events": {
@@ -20037,15 +20037,34 @@
                     ],
                     "name": "Transfer",
                     "type": "event"
+                },
+                "0xa109ba539900bf1b633f956d63c96fc89b814c7287f7aa50a9216d0b55657207": {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "string",
+                            "name": "_value",
+                            "type": "string"
+                        },
+                        {
+                            "indexed": true,
+                            "internalType": "uint256",
+                            "name": "_id",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "PermanentURI",
+                    "type": "event"
                 }
             },
             "links": {},
-            "address": "0x1427C5DdF1371538039B9e62360E3ab9f0186d17",
-            "transactionHash": "0x8394b13bc8ce06a83cb3e4ce27dcf7b38063fecf665c99f68cdec9d3b4e9bb3b"
+            "address": "0x4966858aa87E5579c3334FC8C8c0445a8DEd36aA",
+            "transactionHash": "0x5bf5573847d2501cac298e9d46049661b8e0c09fbffab5761fe2a53c93f7ecd9"
         }
     },
     "schemaVersion": "3.4.14",
-    "updatedAt": "2023-07-31T04:53:01.362Z",
+    "updatedAt": "2023-08-01T07:29:25.316Z",
     "networkType": "ethereum",
     "devdoc": {
         "events": {
