@@ -48,7 +48,7 @@ module.exports = async function (context, tartistSbMsg) {
 
         const traitName = await tartistContract.methods.availableTraits(traits[traitIdx]).call();
 
-        if (traitName != "FileArchivist") { //hack for 0.2 where bots got minted with this invalid trait
+        if (traitName != "FileArchiver") { //hack for 0.2 where bots got minted with this invalid trait
             if (traitDynValues[traitIdx]) {
                 metaAttributes.push({
                     "trait_type": traitName,
