@@ -67,7 +67,7 @@ module.exports = async function (context, tartiSbMsg) {
     let beatInfo;
     while (retryCount < 3) {
         try {
-            beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata));
+            beatInfo = (await traitio.promptBot("MakeBeat", tartistMetadata, { memoryId: `tarti.${tokenId}` }));
         } catch (error) {
             context.log(`Triggering retry ${retryCount}, Could not make beat due to ${error}`);
         }
@@ -99,7 +99,7 @@ module.exports = async function (context, tartiSbMsg) {
         ]
     }
     //generate an image for this song
-    const songImageFileLocalToTrait = (await traitio.promptBot("GenerateSongImage", tartistMetadata, tartiMetaData))[0];
+    const songImageFileLocalToTrait = (await traitio.promptBot("GenerateSongImage", tartistMetadata, tartiMetaData, { memoryId: `tartisongimage.${tokenId}` }))[0];
     tartiMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": songImageFileLocalToTrait }))[0]; //TraitHttpIO will return an IPFS CID
     tartiMetaData.animation_url = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["mp3"] }))[0]; //TraitHttpIO will return an IPFS CID
     tartiMetaData.external_url = `http//tartiart.com/tarti/${tokenId}`;
