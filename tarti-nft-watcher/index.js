@@ -114,6 +114,9 @@ module.exports = async function (context, myTimer) {
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
         const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
+            //if it fails (returns false) we just keep going because we still want to send the message batch,
+            //in case some of these contract successfully sent. If we aborted here without sending the sb batch
+            //we would end up orphaning those and being stuck as described below in the TARTI-128 note.
             await nft.sendContractTx(context, tartistContract, "setCreationStarted", [uncreatedMetadatas[i], tokenToQueueContract.options.address != tartistContract.options.address]);
         }
 
