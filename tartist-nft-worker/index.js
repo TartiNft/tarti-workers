@@ -48,22 +48,23 @@ module.exports = async function (context, tartistSbMsg) {
 
         const traitName = await tartistContract.methods.availableTraits(traits[traitIdx]).call();
 
-        if (traitName != "FileArchiver") { //hack for 0.2 where bots got minted with this invalid trait
-            if (traitDynValues[traitIdx]) {
-                metaAttributes.push({
-                    "trait_type": traitName,
-                    "value": traitDynValues[traitIdx],
-                    "dominance": botTraitDominances[traitIdx]
-                });
+        if (traitDynValues[traitIdx]) {
+            let nftTraitName = traitName;
+            if (nftTraitName.substring(0, 3) == "Dyn") nftTraitName = nftTraitName.substring(3);
 
-            } else {
-                metaAttributes.push({
-                    "value": traitName,
-                    "dominance": botTraitDominances[traitIdx]
-                });
-            }
+            metaAttributes.push({
+                "trait_type": nftTraitName,
+                "value": traitDynValues[traitIdx],
+                "dominance": botTraitDominances[traitIdx]
+            });
+        } else {
+            metaAttributes.push({
+                "value": traitName,
+                "dominance": botTraitDominances[traitIdx]
+            });
         }
     }
+
     const botMetaData = {
         "name": "",
         "description": "",
