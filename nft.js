@@ -1,6 +1,9 @@
 let web3;
 const { Web3 } = require('web3');
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const ethClientUri = process.env["ETH_CLIENT_URL"];
+if (!ethClientUri) throw new Error(`Eth client missing`);
+
 web3 = new Web3(ethClientUri);
 web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
 web3.eth.defaultAccount = process.env['CONTRACT_OWNER_WALLET_ADDRESS'];
@@ -23,7 +26,7 @@ const usingTestnet = async () => {
     return (await web3.eth.net.getId()) !== 1;
 };
 
-const sendContractTx = async (context, contract, methodName, methodArgs) => {
+const sendContractTx = async (contract, methodName, methodArgs) => {
     var latestblock = await web3.eth.getBlock("latest");
     const threeGwei = web3.utils.toBigInt(web3.utils.toWei(3, "gwei"));
     const eightGwei = web3.utils.toBigInt(web3.utils.toWei(8, "gwei"));
@@ -46,7 +49,7 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
             tip = threeGwei;
         }
         if (tip > eightGwei) {
-            context.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
+            console.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
             return false;
         }
     }
@@ -54,7 +57,7 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     const curNonce = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS']);
     const curNoncepending = await web3.eth.getTransactionCount(process.env['CONTRACT_OWNER_WALLET_ADDRESS'], 'pending');
     if (curNonce != curNoncepending) {
-        context.log(`Can't be certain current nonce is correct. Transactions pending. Gonna wait to add traits. (nonces: ${curNonce}, ${curNoncepending})`);
+        console.log(`Can't be certain current nonce is correct. Transactions pending. (nonces: ${curNonce}, ${curNoncepending})`);
         return false;
     }
 
@@ -69,7 +72,7 @@ const sendContractTx = async (context, contract, methodName, methodArgs) => {
     const estimatedGas = await methodDef.estimateGas();
     txOptions["gas"] = estimatedGas + (estimatedGas / bigTen);
 
-    context.log(`${methodName} ${methodArgs}, tip: ${tip}, maxfee: ${maxFee}, gas limit: ${txOptions["gas"]}`);
+    console.log(`${methodName} ${methodArgs}, tip: ${tip}, maxfee: ${maxFee}, gas limit: ${txOptions["gas"]}`);
     return await methodDef.send(txOptions);
 };
 

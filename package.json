@@ -10,6 +10,7 @@
     "@azure/service-bus": "^7.9.0",
     "@pinata/sdk": "^2.1.0",
     "axios": "^1.4.0",
+    "dotenv": "^16.4.5",
     "web3": "^4.0.2"
   }
 }
