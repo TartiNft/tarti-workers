@@ -10,7 +10,7 @@ module.exports = async function (context, myTimer) {
     // on test it is in Azure deploy slot config
     const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
-    const nft = require("../nft");
+    const nft = require("../shared/nft");
 
     /**
      * Go backwards from newest token to oldest token and look at each token's URI.
@@ -112,7 +112,7 @@ module.exports = async function (context, myTimer) {
         //Set the URI on the queued tokens so that we know they are no longer new.
         //@todo doing synchronous for now.. better to do async and do a waitall or allsettled afterwards, i reckon
         context.log(`Update ${uncreatedMetadatas.length} token uris`);
-        const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
+        const tartistContract = await nft.getContract(__dirname + "/../shared/contracts/Tartist.json");
         for (let i = 0; i < uncreatedMetadatas.length; i++) {
             //if it fails (returns false) we just keep going because we still want to send the message batch,
             //in case some of these contract successfully sent. If we aborted here without sending the sb batch
@@ -134,7 +134,7 @@ module.exports = async function (context, myTimer) {
 
     context.log('Enqueue Tartist events');
     await enqueueTokenEvents(
-        __dirname + "/../contracts/Tartist.json",
+        __dirname + "/../shared/contracts/Tartist.json",
         newlyMintedTartistUri,
         process.env['TARTIST_QUEUE_CONNECTION_STRING'],
         process.env['TARTIST_QUEUE_NAME']
