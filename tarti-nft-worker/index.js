@@ -19,8 +19,8 @@ module.exports = async function (context, tartiSbMsg) {
 
     //Get smart contract definitions
     const nft = require("../nft");
-    const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
-    const tartiContract = await nft.getContract(__dirname + "/../contracts/Tarti.json");
+    const tartistContract = await nft.getContract(__dirname + "/../shared/contracts/Tartist.json");
+    const tartiContract = await nft.getContract(__dirname + "/../shared/contracts/Tarti.json");
 
     //Get the Tarti tokenId, needed in several places
     const tokenId = parseInt(tartiSbMsg);

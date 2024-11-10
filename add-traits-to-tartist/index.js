@@ -1,5 +1,5 @@
-const nft = require("../nft");
-const traitio = require("../traithttpclient");
+const nft = require("../shared/nft");
+const traitio = require("../shared/traithttpclient");
 
 async function addTraitsToTartist() {
   console.log('add-trait-to-tartist is starting...');
@@ -9,7 +9,7 @@ async function addTraitsToTartist() {
 
   try {
     console.log("Loading Tartist contract...");
-    const contract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
+    const contract = await nft.getContract(__dirname + "/../shared/contracts/Tartist.json");
 
     console.log("Get existing traits...");
     const existingTraitIds = await contract.methods.getAllTraits().call();

@@ -4,7 +4,7 @@ module.exports = async function (context, tartistSbMsg) {
 
     //Load the Tartist contract interface
     const nft = require("../nft");
-    const tartistContract = await nft.getContract(__dirname + "/../contracts/Tartist.json");
+    const tartistContract = await nft.getContract(__dirname + "/../shared/contracts/Tartist.json");
 
     //Get the Tartist tokenId, needed in several places
     const tokenId = parseInt(tartistSbMsg);
