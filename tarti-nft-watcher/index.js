@@ -15,7 +15,7 @@ async function enqueueWorkForNewTokens() {
     const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
     const redisClient = redis.createClient({
-        url: process.env['REDIS_URL']
+        url: `redis://${process.env['REDIS_HOST']}:${process.env['REDIS_PORT']}`
     });
 
     /**
