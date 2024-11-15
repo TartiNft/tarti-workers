@@ -1,5 +1,5 @@
 async function enqueueWorkForNewTokens() {
-    if (!process.env['REDIS_URL'] || !process.env['NEW_TARTIST_METADATA_CID'] || !process.env['NEW_TARTI_METADATA_CID'] || !process.env['TARTIST_QUEUE_NAME'] || !process.env['TARTI_QUEUE_NAME']) {
+    if (!process.env['REDIS_HOST'] || !process.env['NEW_TARTIST_METADATA_CID'] || !process.env['NEW_TARTI_METADATA_CID'] || !process.env['TARTIST_QUEUE_NAME'] || !process.env['TARTI_QUEUE_NAME']) {
         throw new Error("Missing required environment variables");
     }
 
@@ -15,7 +15,7 @@ async function enqueueWorkForNewTokens() {
     const newlyMintedTartistUri = "ipfs://" + process.env["NEW_TARTIST_METADATA_CID"];
     const newlyMintedTartiUri = "ipfs://" + process.env["NEW_TARTI_METADATA_CID"];
     const redisClient = redis.createClient({
-        url: `redis://${process.env['REDIS_HOST']}:${process.env['REDIS_PORT']}`
+        url: `redis://${process.env['REDIS_HOST']}:${process.env['REDIS_PORT'] ? process.env['REDIS_PORT'] : 6379}`
     });
 
     /**
