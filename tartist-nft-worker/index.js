@@ -3,12 +3,12 @@ const config = require("../shared/config");
 const redisClient = redis.createClient({
     url: `redis://${config['REDIS_HOST']}:${config['REDIS_PORT'] ? config['REDIS_PORT'] : 6379}`
 });
-await redisClient.connect();
-
+console.log(`Redis Host is: ${config['REDIS_HOST']}`);
 async function processNextQueuedToken() {
     const nft = require("../shared/nft");
 
-    const nextTokenIdString = await redisClient.LPOP(config.TARTI_QUEUE_NAME);
+    console.log('Getting next token...');
+    const nextTokenIdString = await redisClient.lIndex(config.TARTIST_QUEUE_NAME, 0);
     if (nextTokenIdString === null) return;
     console.log('Tartist Worker processing token', nextTokenIdString);
 
@@ -23,6 +23,9 @@ async function processNextQueuedToken() {
     const tokenUri = (await tartistContract.methods.tokenURI(tokenId).call()).substring(0, tartistInCreationUri.length);
     console.log(`Checking if Tartist ${tokenUri} is in the creating state ${tokenUri} == ${tartistInCreationUri}`)
     if (tokenUri != tartistInCreationUri) {
+        // If its not in the creatig state then its either still new or someone already created it
+        // Either way, nothing we can do with it
+        await redisClient.LPOP(config.TARTIST_QUEUE_NAME);
         return;
     }
 
@@ -84,7 +87,7 @@ async function processNextQueuedToken() {
     }
 
     //Fill in the metadata, upload it to IPFS, and update the TokeURI with the new metadata URI
-    const traitio = require("../traithttpclient");
+    const traitio = require("../shared/traithttpclient");
     try {
         //Use TRAIT AI to generate parts of the new bot
         botMetaData.name = (await traitio.promptBot("GenerateYourName", botMetaData))[0];
@@ -105,8 +108,17 @@ async function processNextQueuedToken() {
 
         //Update the TokenURI for the bot on the TARTIST contract
         const metaDataFileHash = pinResponse.IpfsHash;
-        await nft.sendContractTx(tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
         console.log(`Metadata hash: ${metaDataFileHash}`);
+
+        console.log('Updating NFT State to Created...');
+        const txReceipt = await nft.sendContractTx(tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
+        if (txReceipt === false || txReceipt.status === false) {
+            throw "Blockchain Transaction failed. Please try again.";
+        }
+
+        // actually pop it off the queue once processing succeeds
+        await redisClient.LPOP(config.TARTIST_QUEUE_NAME);
+
     } catch (error) {
         //@tbd send notification that tartist failed to generate
         console.log(error);
@@ -117,13 +129,29 @@ async function processNextQueuedToken() {
 };
 
 async function processNextQueuedTokens() {
-    while (await redisClient.LLEN(config.TARTI_QUEUE_NAME) > 0) {
-        await processNextQueuedToken();
+    await redisClient.connect();
+    try {
+        if (await redisClient.LLEN(config.TARTIST_QUEUE_NAME) == 0) {
+            console.log(`The queue ${config.TARTIST_QUEUE_NAME} is empty`);
+        }
+        while (await redisClient.LLEN(config.TARTIST_QUEUE_NAME) > 0) {
+            await processNextQueuedToken();
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        await redisClient.quit();
     }
 }
 module.exports = processNextQueuedTokens;
 
 // Run if invoked directly
 if (require.main === module) {
-    processNextQueuedTokens();
+    processNextQueuedTokens().then(() => {
+        console.log("All tokens processed successfully.");
+        process.exit(0); // Explicitly exit when work is done
+    }).catch((error) => {
+        console.error("Error processing tokens:", error);
+        process.exit(1); // Exit with error code on failure
+    });
 }
