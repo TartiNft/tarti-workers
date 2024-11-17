@@ -1,18 +1,27 @@
-module.exports = async function (context, tartistSbMsg) {
+const redis = require("redis");
+const config = require("../shared/config");
+const redisClient = redis.createClient({
+    url: `redis://${config['REDIS_HOST']}:${config['REDIS_PORT'] ? config['REDIS_PORT'] : 6379}`
+});
+await redisClient.connect();
 
-    context.log('Tartist Worker received message', tartistSbMsg);
+async function processNextQueuedToken() {
+    const nft = require("../shared/nft");
+
+    const nextTokenIdString = await redisClient.LPOP(config.TARTI_QUEUE_NAME);
+    if (nextTokenIdString === null) return;
+    console.log('Tartist Worker processing token', nextTokenIdString);
 
     //Load the Tartist contract interface
-    const nft = require("../nft");
     const tartistContract = await nft.getContract(__dirname + "/../shared/contracts/Tartist.json");
 
     //Get the Tartist tokenId, needed in several places
-    const tokenId = parseInt(tartistSbMsg);
+    const tokenId = parseInt(nextTokenIdString);
 
     //Check if this Tartist has already been created. If so, skip.
-    const tartistInCreationUri = "ipfs://" + process.env["CREATING_TARTIST_METADATA_CID"];
+    const tartistInCreationUri = "ipfs://" + config["CREATING_TARTIST_METADATA_CID"];
     const tokenUri = (await tartistContract.methods.tokenURI(tokenId).call()).substring(0, tartistInCreationUri.length);
-    context.log(`Checking if Tartist ${tokenUri} is in the creating state ${tokenUri} == ${tartistInCreationUri}`)
+    console.log(`Checking if Tartist ${tokenUri} is in the creating state ${tokenUri} == ${tartistInCreationUri}`)
     if (tokenUri != tartistInCreationUri) {
         return;
     }
@@ -21,14 +30,14 @@ module.exports = async function (context, tartistSbMsg) {
     //For now lets just limit each user to a max of 6 bots.
     const tokenMinter = await tartistContract.methods.ownerOf(tokenId).call();
     const minterTartistCount = await tartistContract.methods.balanceOf(tokenMinter).call();
-    if ((tokenMinter != process.env.CONTRACT_OWNER_WALLET_ADDRESS) && nft.usingTestnet() && (minterTartistCount >= 6)) {
-        context.log('User has reached their TARTIST minting limit on this TestNet', tartistSbMsg);
+    if ((tokenMinter != config.CONTRACT_OWNER_WALLET_ADDRESS) && nft.usingTestnet() && (minterTartistCount >= 6)) {
+        console.log('User has reached their TARTIST minting limit on this TestNet', tokenId);
         return;
     }
 
     //Once 50 bots are minted, only owner can mint anymore.
     if (nft.usingTestnet() && ((await tartistContract.methods.totalSupply().call()) >= 50)) {
-        context.log('Temporarily, no more TARTISTs on Testnet will be created', tartistSbMsg);
+        console.log('Temporarily, no more TARTISTs on Testnet will be created', tokenId);
         return;
     }
 
@@ -86,7 +95,7 @@ module.exports = async function (context, tartistSbMsg) {
 
         //Pin metadata to IPFS usaing PInata
         const pinataSDK = require('@pinata/sdk');
-        const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
+        const pinata = new pinataSDK({ pinataJWTKey: config["PINATA_API_JWT"] });
         const authResult = await pinata.testAuthentication();
         const pinResponse = await pinata.pinJSONToIPFS(botMetaData, {
             pinataMetadata: {
@@ -96,13 +105,25 @@ module.exports = async function (context, tartistSbMsg) {
 
         //Update the TokenURI for the bot on the TARTIST contract
         const metaDataFileHash = pinResponse.IpfsHash;
-        await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
-        context.log(`Metadata hash: ${metaDataFileHash}`);
+        await nft.sendContractTx(tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), false]);
+        console.log(`Metadata hash: ${metaDataFileHash}`);
     } catch (error) {
         //@tbd send notification that tartist failed to generate
-        context.log(error);
+        console.log(error);
         throw error;
     }
 
-    context.log('TartiWorker processed message', tartistSbMsg);
+    console.log('TartiWorker processed message', tokenId);
 };
+
+async function processNextQueuedTokens() {
+    while (await redisClient.LLEN(config.TARTI_QUEUE_NAME) > 0) {
+        await processNextQueuedToken();
+    }
+}
+module.exports = processNextQueuedTokens;
+
+// Run if invoked directly
+if (require.main === module) {
+    processNextQueuedTokens();
+}

@@ -7,13 +7,13 @@ LABEL service="add-traits-to-tartist"
 WORKDIR /app
 
 # Copy the shared folder into the container
-COPY ../shared ./shared
+COPY ./shared ./
 
 # Copy the service-specific files into the container
-COPY . .
+COPY ./add-traits-to-tartist ./
 
 # Copy package.json and package-lock.json for dependency installation
-COPY ../package*.json ./
+COPY ./package*.json ./
 
 # Install dependencies
 RUN npm install --only=production

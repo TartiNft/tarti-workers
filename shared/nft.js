@@ -4,6 +4,10 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const ethClientUri = process.env["ETH_CLIENT_URL"];
 if (!ethClientUri) throw new Error(`Eth client missing`);
 
+if (!process.env['REDIS_HOST'] || !process.env['NEW_TARTIST_METADATA_CID'] || !process.env['NEW_TARTI_METADATA_CID'] || !process.env['TARTIST_QUEUE_NAME'] || !process.env['TARTI_QUEUE_NAME']) {
+    throw new Error("Missing required environment variables");
+}
+
 web3 = new Web3(ethClientUri);
 web3.eth.accounts.wallet.add(process.env['CONTRACT_OWNER_WALLET_PK']);
 web3.eth.defaultAccount = process.env['CONTRACT_OWNER_WALLET_ADDRESS'];
