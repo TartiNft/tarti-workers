@@ -65,7 +65,7 @@ async function enqueueWorkForNewTokens() {
                     tokenToQueueContract.options.address !== tartistContract.options.address
                 ]);
 
-                if (txReceipt.status === false) {
+                if (txReceipt === false || txReceipt.status === false) {
                     redisTransaction.discard();
                 } else {
                     // Commit the transaction if the contract tx is successful
