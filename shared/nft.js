@@ -45,7 +45,7 @@ const sendContractTx = async (contract, methodName, methodArgs) => {
     //As such, the most recent tip is mine, I double it, and then its too expensive forever :)
     //So when local, lets just makde default tip and keep it moving.
     let tip;
-    if (process.env["ETH_CLIENT_URL"].includes("127.0.0.1")) {
+    if (process.env["ETH_CLIENT_URL"].includes("127.0.0.1") || process.env["ETH_CLIENT_URL"].includes("localhost") || process.env["ETH_CLIENT_URL"].includes("host.docker.internal")) {
         tip = web3.utils.toBigInt(web3.utils.toWei(1, "gwei"));
     } else {
         tip = recentAvgTip * bigTwo;
@@ -53,7 +53,7 @@ const sendContractTx = async (contract, methodName, methodArgs) => {
             tip = threeGwei;
         }
         if (tip > eightGwei) {
-            console.log(`Skipping trait because it is too expensive right now. Tip was at: ${tip}`);
+            console.log(`Skipping TX because it is too expensive right now. Tip was at: ${tip}`);
             return false;
         }
     }
