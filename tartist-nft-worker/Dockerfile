@@ -1,7 +1,7 @@
 # Use Node.js as the base image
 FROM node:18-alpine
 
-LABEL service="tarti-nft-worker"
+LABEL service="tartist-nft-worker"
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -10,7 +10,7 @@ WORKDIR /app
 COPY ./shared ./shared
 
 # Copy the service-specific files into the container
-COPY ./tarti-nft-worker/index.js ./tarti-nft-worker/index.js
+COPY ./tartist-nft-worker/index.js ./tartist-nft-worker/index.js
 
 # Copy package.json and package-lock.json for dependency installation
 COPY ./package*.json ./
@@ -19,4 +19,4 @@ COPY ./package*.json ./
 RUN npm install --only=production
 
 # Set the command to run the service
-CMD ["node", "tarti-nft-worker/index.js"]
+CMD ["node", "tartist-nft-worker/index.js"]
