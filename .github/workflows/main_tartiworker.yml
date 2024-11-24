@@ -49,6 +49,9 @@ jobs:
       run: ls -l tarti-nft-worker.tar
 
     # Step 6: Transfer all images to the remote server
+    - name: Verify all tarballs exists
+      run: ls -l *.tar
+
     - name: Transfer Docker images to remote server
       uses: appleboy/scp-action@v0.1.2
       with:
