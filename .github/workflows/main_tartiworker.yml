@@ -24,17 +24,29 @@ jobs:
         docker build -t tarti-nft-watcher:latest -f tarti-nft-watcher/Dockerfile .
         docker save tarti-nft-watcher:latest -o tarti-nft-watcher.tar
 
+    # Step 3.5: Verify tar tarti-nft-watcher
+    - name: Verify tarball exists
+      run: ls -l tarti-nft-watcher.tar
+              
     # Step 4: Build and save tartist-nft-worker
     - name: Build tartist-nft-worker
       run: |
         docker build -t tartist-nft-worker:latest -f tartist-nft-worker/Dockerfile .
         docker save tartist-nft-worker:latest -o tartist-nft-worker.tar
 
-    # Step 5: Build and save tarti-nft-worker
+    # Step 4.5: Verify tar tartist-nft-worker
+    - name: Verify tarball exists
+      run: ls -l tartist-nft-worker.tar
+
+      # Step 5: Build and save tarti-nft-worker
     - name: Build tarti-nft-worker
       run: |
         docker build -t tarti-nft-worker:latest -f tarti-nft-worker/Dockerfile .
         docker save tarti-nft-worker:latest -o tarti-nft-worker.tar
+
+    # Step 5.5: Verify tar tarti-nft-worker
+    - name: Verify tarball exists
+      run: ls -l tarti-nft-worker.tar
 
     # Step 6: Transfer all images to the remote server
     - name: Transfer Docker images to remote server
