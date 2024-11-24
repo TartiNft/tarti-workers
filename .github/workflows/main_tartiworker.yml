@@ -52,7 +52,7 @@ jobs:
     - name: Verify all tarballs exists
       run: ls -l *.tar
 
-    - name: Test SSH Connection
+    - name: Generate SSH p key
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > /tmp/github-actions-key
@@ -64,10 +64,9 @@ jobs:
       with:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
-        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        key_path: /tmp/github-actions-key
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
-        debug: true
 
     # Step 7: SSH into the remote server and deploy
     - name: Deploy Docker images on remote server
