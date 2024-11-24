@@ -54,23 +54,23 @@ jobs:
 
     - name: Add Host Key to Known Hosts
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.DOCKER_SSH_HOST }} >> ~/.ssh/known_hosts
+        mkdir -p $HOME/.ssh
+        ssh-keyscan -H ${{ secrets.DOCKER_SSH_HOST }} >> $HOME/.ssh/known_hosts
 
     - name: Test SSH Connection
       run: |
-        mkdir -p ~/.ssh
+        mkdir -p $HOME/.ssh
         mkdir -p "$RUNNER_TEMP"
-        echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-key
-        chmod 600 ~/.ssh/github-actions-key
-        ssh -i ~/.ssh/github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
+        echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > $HOME/.ssh/github-actions-key
+        chmod 600 $HOME/.ssh/github-actions-key
+        ssh -i $HOME/.ssh/github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
         
     - name: Transfer Docker images to remote server
       uses: appleboy/scp-action@v0.1.2
       with:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
-        key_path: ~/.ssh/github-actions-key
+        key_path: $HOME/.ssh/github-actions-key
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
         debug: true
