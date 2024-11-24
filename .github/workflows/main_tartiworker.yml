@@ -52,6 +52,11 @@ jobs:
     - name: Verify all tarballs exists
       run: ls -l *.tar
 
+    - name: Add Host Key to Known Hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.DOCKER_SSH_HOST }} >> ~/.ssh/known_hosts
+
     - name: Test SSH Connection
       run: |
         mkdir -p ~/.ssh
