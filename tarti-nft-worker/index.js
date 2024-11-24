@@ -99,6 +99,10 @@ async function processNextQueuedToken() {
         }
 
         //Generate Tarti metadata
+        console.log(`Store image file on IPFS (${beatInfo["png"]})...`);
+        $tracksImageIpfsUri = (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["png"] }))[0];
+
+        console.log("Generate Tarti Metadata...");
         const tartiMetaData = {
             "name": beatInfo["title"],
             "description": "test description",
@@ -113,17 +117,20 @@ async function processNextQueuedToken() {
                 },
                 {
                     "trait_type": "TracksImage",
-                    "value": "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["png"] }))[0]
+                    "value": "ipfs://" + $tracksImageIpfsUri
                 }
             ]
         }
+
         //generate an image for this song
+        console.log("Generate song image...");
         const songImageFileLocalToTrait = (await traitio.promptBot("GenerateSongImage", tartistMetadata, tartiMetaData, { memoryId: `tartisongimage.${tokenId}` }))[0];
         tartiMetaData.image = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": songImageFileLocalToTrait }))[0]; //TraitHttpIO will return an IPFS CID
         tartiMetaData.animation_url = "ipfs://" + (await traitio.promptBot("PinFilesToIpfs", tartistMetadata, { "Files*": beatInfo["mp3"] }))[0]; //TraitHttpIO will return an IPFS CID
         tartiMetaData.external_url = `http//tartiart.com/tarti/${tokenId}`;
 
         //Pin Tarti metadata to IPFS usaing Pinata
+        console.log("Pin metadata to IPFS...");
         const pinataSDK = require('@pinata/sdk');
         const pinata = new pinataSDK({ pinataJWTKey: process.env["PINATA_API_JWT"] });
         const authResult = await pinata.testAuthentication();
@@ -135,12 +142,14 @@ async function processNextQueuedToken() {
         const metaDataFileHash = pinResponse.IpfsHash;
 
         //Update the Tarti's TokenURI to be that of the new Metadata
-        const txReceipt = await nft.sendContractTx(context, tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true]);
+        console.log("Update Tarti TokenURI on the blockchain...");
+        const txReceipt = await nft.sendContractTx(tartistContract, "setCreated", [tokenId, nft.web3.utils.fromAscii(metaDataFileHash), true]);
         if (txReceipt === false || txReceipt.status === false) {
             throw "Blockchain Transaction failed when updating Tarti. Please try again.";
         }
 
         // actually pop it off the queue once processing succeeds
+        console.log(`Complete processing token (${tokenId})...`);
         await redisClient.LPOP(config.TARTI_QUEUE_NAME);
     } catch (err) {
         throw err;
@@ -148,7 +157,7 @@ async function processNextQueuedToken() {
         await redisClient.quit();
     }
 
-    console.log(`Tarti ${tokenId} created, metadata hash: ${metaDataFileHash}`);
+    console.log(`Tarti created.`);
 };
 
 /**
