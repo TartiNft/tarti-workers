@@ -55,10 +55,7 @@ jobs:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
         key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
-        source: |
-          ${{ github.workspace }}/tarti-nft-watcher.tar
-          ${{ github.workspace }}/tartist-nft-worker.tar
-          ${{ github.workspace }}/tarti-nft-worker.tar
+        source: ${{ github.workspace }}/*.tar
         target: /tmp/
 
     # Step 7: SSH into the remote server and deploy
