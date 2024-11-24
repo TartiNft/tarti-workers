@@ -65,6 +65,7 @@ jobs:
         chmod 600 ~/.ssh/github-actions-key
         ssh -i ~/.ssh/github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
         ls -la ~
+        pwd
         
     - name: Transfer Docker images to remote server
       uses: appleboy/scp-action@v0.1.2
