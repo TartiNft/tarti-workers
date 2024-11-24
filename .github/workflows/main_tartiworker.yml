@@ -48,40 +48,37 @@ jobs:
     - name: Verify tarball exists
       run: ls -l tarti-nft-worker.tar
 
-    # Step 6: Transfer all images to the remote server
-    - name: Verify all tarballs exists
-      run: ls -l *.tar
-
-    - name: Transfer Docker images to remote server
+    - name: Transfer and Deploy Docker Images on Remote Server
       run: |
+        # Setup SSH and Known Hosts
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.DOCKER_SSH_HOST }} >> ~/.ssh/known_hosts
         echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > github-actions-key
         chmod 600 github-actions-key
-        ssh -i github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
+
+        # Verify Tarballs Exist
+        ls -l ${{ github.workspace }}/*.tar
+
+        # Transfer Tarballs to Remote Server
         scp -i github-actions-key ${{ github.workspace }}/*.tar github-actions@${{ secrets.DOCKER_SSH_HOST }}:/tmp/
 
-    # Step 7: SSH into the remote server and deploy
-    - name: SSH into target to load images
-      uses: appleboy/ssh-action@v0.1.2
-      with:
-        host: ${{ secrets.DOCKER_SSH_HOST }}
-        username: ${{ secrets.DOCKER_SSH_USER }}
-        key: "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}"
-        script: |
-          # Load Docker images
+        # SSH into Remote Server to Deploy
+        ssh -i github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} << 'EOF'
+          # Load Docker Images
           docker load < /tmp/tarti-nft-watcher.tar
           docker load < /tmp/tartist-nft-worker.tar
           docker load < /tmp/tarti-nft-worker.tar
 
-          # Stop and remove old containers
+          # Stop and Remove Old Containers
           # docker stop tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
           # docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
 
-          # Run new containers
+          # Run New Containers
           # docker run -d --name tarti-nft-watcher tarti-nft-watcher:latest
           # docker run -d --name tartist-nft-worker tartist-nft-worker:latest
           # docker run -d --name tarti-nft-worker tarti-nft-worker:latest
 
-          # Clean up tarballs
+          # Clean Up Tarballs
           rm /tmp/tarti-nft-watcher.tar /tmp/tartist-nft-worker.tar /tmp/tarti-nft-worker.tar
+        EOF
+
