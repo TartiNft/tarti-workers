@@ -1,3 +1,5 @@
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
+
 /**
  * POST something to the TRAIT AI API (via TraitHttpIO) 
  * @param {string} command 
