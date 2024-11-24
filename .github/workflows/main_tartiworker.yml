@@ -1,44 +1,75 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js project to Azure Function App - TartiWorker
+name: Build and Deploy Docker Services
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
-
-env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '18.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v2
+    # Step 1: Checkout the source code
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Node ${{ env.NODE_VERSION }} Environment
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+    # Step 2: Set up Docker CLI
+    - name: Set up Docker CLI
+      uses: docker/setup-buildx-action@v2
 
-      - name: 'Resolve Project Dependencies Using Npm'
-        shell: pwsh
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-          popd
+    # Step 3: Build and save tarti-nft-watcher
+    - name: Build tarti-nft-watcher
+      run: |
+        docker build -t tarti-nft-watcher:latest -f tarti-nft-watcher/Dockerfile .
+        docker save tarti-nft-watcher:latest -o tarti-nft-watcher.tar
 
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        id: fa
-        with:
-          app-name: 'TartiWorker'
-          slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B5664DB81B9648468E9A2FF15FFC46B2 }}
+    # Step 4: Build and save tartist-nft-worker
+    - name: Build tartist-nft-worker
+      run: |
+        docker build -t tartist-nft-worker:latest -f tartist-nft-worker/Dockerfile .
+        docker save tartist-nft-worker:latest -o tartist-nft-worker.tar
+
+    # Step 5: Build and save tarti-nft-worker
+    - name: Build tarti-nft-worker
+      run: |
+        docker build -t tarti-nft-worker:latest -f tarti-nft-worker/Dockerfile .
+        docker save tarti-nft-worker:latest -o tarti-nft-worker.tar
+
+    # Step 6: Transfer all images to the remote server
+    - name: Transfer Docker images to remote server
+      uses: appleboy/scp-action@v0.1.2
+      with:
+        host: ${{ secrets.DOCKER_SSH_HOST }}
+        username: ${{ secrets.DOCKER_SSH_USER }}
+        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        source: |
+          tarti-nft-watcher.tar
+          tartist-nft-worker.tar
+          tarti-nft-worker.tar
+        target: /tmp/
+
+    # Step 7: SSH into the remote server and deploy
+    - name: Deploy Docker images on remote server
+      uses: appleboy/ssh-action@v0.1.2
+      with:
+        host: ${{ secrets.DOCKER_SSH_HOST }}
+        username: ${{ secrets.DOCKER_SSH_USER }}
+        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        script: |
+          # Load Docker images
+          docker load < /tmp/tarti-nft-watcher.tar
+          docker load < /tmp/tartist-nft-worker.tar
+          docker load < /tmp/tarti-nft-worker.tar
+
+          # Stop and remove old containers
+          # docker stop tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
+          # docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
+
+          # Run new containers
+          # docker run -d --name tarti-nft-watcher tarti-nft-watcher:latest
+          # docker run -d --name tartist-nft-worker tartist-nft-worker:latest
+          # docker run -d --name tarti-nft-worker tarti-nft-worker:latest
+
+          # Clean up tarballs
+          rm /tmp/tarti-nft-watcher.tar /tmp/tartist-nft-worker.tar /tmp/tarti-nft-worker.tar
