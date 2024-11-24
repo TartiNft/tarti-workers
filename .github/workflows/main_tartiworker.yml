@@ -23,30 +23,24 @@ jobs:
       run: |
         docker build -t tarti-nft-watcher:latest -f tarti-nft-watcher/Dockerfile .
         docker save tarti-nft-watcher:latest -o ${{ github.workspace }}/tarti-nft-watcher.tar
-
-    # Step 3.5: Verify tar tarti-nft-watcher
-    - name: Verify tarball exists
-      run: ls -l tarti-nft-watcher.tar
-              
+           
     # Step 4: Build and save tartist-nft-worker
     - name: Build tartist-nft-worker
       run: |
         docker build -t tartist-nft-worker:latest -f tartist-nft-worker/Dockerfile .
         docker save tartist-nft-worker:latest -o ${{ github.workspace }}/tartist-nft-worker.tar
 
-    # Step 4.5: Verify tar tartist-nft-worker
-    - name: Verify tarball exists
-      run: ls -l tartist-nft-worker.tar
-
-      # Step 5: Build and save tarti-nft-worker
+    # Step 5: Build and save tarti-nft-worker
     - name: Build tarti-nft-worker
       run: |
         docker build -t tarti-nft-worker:latest -f tarti-nft-worker/Dockerfile .
         docker save tarti-nft-worker:latest -o ${{ github.workspace }}/tarti-nft-worker.tar
 
-    # Step 5.5: Verify tar tarti-nft-worker
-    - name: Verify tarball exists
-      run: ls -l tarti-nft-worker.tar
+    # Step 5: Build and save add-traits-to-tartist
+    - name: Build add-traits-to-tartist
+      run: |
+        docker build -t add-traits-to-tartist:latest -f add-traits-to-tartist/Dockerfile .
+        docker save add-traits-to-tartist:latest -o ${{ github.workspace }}/add-traits-to-tartist.tar
 
     - name: Transfer and Deploy Docker Images on Remote Server
       run: |
@@ -68,17 +62,20 @@ jobs:
           docker load < /tmp/tarti-nft-watcher.tar
           docker load < /tmp/tartist-nft-worker.tar
           docker load < /tmp/tarti-nft-worker.tar
+          docker load < /tmp/add-traits-to-tartist.tar
 
           # Stop and Remove Old Containers
-          # docker stop tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
-          # docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker || true
+          # docker stop tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
+          # docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
 
           # Run New Containers
           # docker run -d --name tarti-nft-watcher tarti-nft-watcher:latest
           # docker run -d --name tartist-nft-worker tartist-nft-worker:latest
           # docker run -d --name tarti-nft-worker tarti-nft-worker:latest
+          # docker run -d --name add-traits-to-tartist add-traits-to-tartist:latest
 
           # Clean Up Tarballs
-          rm /tmp/tarti-nft-watcher.tar /tmp/tartist-nft-worker.tar /tmp/tarti-nft-worker.tar
+          rm /tmp/tarti-nft-watcher.tar /tmp/tartist-nft-worker.tar /tmp/tarti-nft-worker.tar /tmp/add-traits-to-tartist.tar
         EOF
 
+        rm github-actions-key
