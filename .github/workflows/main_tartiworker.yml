@@ -65,8 +65,19 @@ jobs:
           docker load < /tmp/add-traits-to-tartist.tar
 
           # Stop and Remove Old Containers
-          # docker stop tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
-          # docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
+          docker wait tarti-nft-watcher || true
+          docker-compose stop tarti-nft-watcher || true
+
+          docker wait tartist-nft-worker || true
+          docker-compose stop tartist-nft-worker || true
+
+          docker wait tarti-nft-worker || true
+          docker-compose stop tarti-nft-worker || true
+
+          docker wait add-traits-to-tartist || true
+          docker-compose stop add-traits-to-tartist || true
+
+          docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
 
           # Run New Containers
           # docker run -d --name tarti-nft-watcher tarti-nft-watcher:latest
