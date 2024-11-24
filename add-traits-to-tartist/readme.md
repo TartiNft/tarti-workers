@@ -1,11 +1,8 @@
-# TimerTrigger - JavaScript
+add-traits-to-tartist
 
-The `TimerTrigger` makes it incredibly easy to have your functions executed on a schedule. This sample demonstrates a simple use case of calling your function every 5 minutes.
+utility function.
 
-## How it works
-
-For a `TimerTrigger` to work, you provide a schedule in the form of a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression)(See the link for full details). A cron expression is a string with 6 separate expressions which represent a given schedule via patterns. The pattern we use to represent every 5 minutes is `0 */5 * * * *`. This, in plain text, means: "When seconds is equal to 0, minutes is divisible by 5, for any hour, day of the month, month, day of the week, or year".
-
-## Learn more
-
-<TODO> Documentation
+- Reads traits from TraitAI and writes them to the Tartist contract on the blockchain
+- Needs to be run anytime traits are added to TraitAI
+- Will run once and finish. It needs to be constantly run to keep checking for newly minted tokens. Use some sort of job scheduler like cron.
+- Currently we use docker-compose auto-restarts to continually spin up a fresh container and make a pass.

@@ -1,6 +1,6 @@
 # tarti-workers
 
-Tarti workers is an Azure Function App that acts as an interface and broker between the [Tarti contracts](https://github.com/TartiNft/tarti) on Ethereum and the [TraitAI Engine](https://github.com/TartiNft/beatmaker), which lives on a Windows server.
+Tarti workers is an set of jobs that acts as an interface and broker between the [Tarti contracts](https://github.com/TartiNft/tarti) on Ethereum and the [TraitAI Engine](https://github.com/TartiNft/beatmaker), which lives on a Windows server.
 
 ## tarti-nft-watcher
 
