@@ -52,21 +52,23 @@ jobs:
     - name: Verify all tarballs exists
       run: ls -l *.tar
 
-    - name: Generate SSH p key
+    - name: Test SSH Connection
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > /tmp/github-actions-key
-        chmod 600 /tmp/github-actions-key
-        ssh -i /tmp/github-actions-key -o StrictHostKeyChecking=no github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
+        mkdir -p "$RUNNER_TEMP"
+        echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > $RUNNER_TEMP/github-actions-key
+        chmod 600 $RUNNER_TEMP/github-actions-key
+        ssh -i $RUNNER_TEMP/github-actions-key -o github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
         
     - name: Transfer Docker images to remote server
       uses: appleboy/scp-action@v0.1.2
       with:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
-        key_path: /tmp/github-actions-key
+        key_path: $RUNNER_TEMP/github-actions-key
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
+        debug: true
 
     # Step 7: SSH into the remote server and deploy
     - name: Deploy Docker images on remote server
