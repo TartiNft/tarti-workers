@@ -67,6 +67,7 @@ jobs:
         key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
+        debug: true
 
     # Step 7: SSH into the remote server and deploy
     - name: Deploy Docker images on remote server
