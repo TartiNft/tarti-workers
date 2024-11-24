@@ -70,7 +70,7 @@ jobs:
       with:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
-        key_path: $RUNNER_TEMP/github-actions-key
+        key_path: ${{ runner.temp }}/github-actions-key
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
         debug: true
