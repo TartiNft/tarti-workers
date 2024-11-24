@@ -64,13 +64,14 @@ jobs:
         echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-key
         chmod 600 ~/.ssh/github-actions-key
         ssh -i ~/.ssh/github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} hostname
+        ls -la ~
         
     - name: Transfer Docker images to remote server
       uses: appleboy/scp-action@v0.1.2
       with:
         host: ${{ secrets.DOCKER_SSH_HOST }}
         username: ${{ secrets.DOCKER_SSH_USER }}
-        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        key_path: /home/runner/.ssh/github-actions-key
         source: ${{ github.workspace }}/*.tar
         target: /tmp/
         debug: true
