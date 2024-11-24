@@ -22,7 +22,7 @@ jobs:
     - name: Build tarti-nft-watcher
       run: |
         docker build -t tarti-nft-watcher:latest -f tarti-nft-watcher/Dockerfile .
-        docker save tarti-nft-watcher:latest -o tarti-nft-watcher.tar
+        docker save tarti-nft-watcher:latest -o ${{ github.workspace }}/tarti-nft-watcher.tar
 
     # Step 3.5: Verify tar tarti-nft-watcher
     - name: Verify tarball exists
@@ -32,7 +32,7 @@ jobs:
     - name: Build tartist-nft-worker
       run: |
         docker build -t tartist-nft-worker:latest -f tartist-nft-worker/Dockerfile .
-        docker save tartist-nft-worker:latest -o tartist-nft-worker.tar
+        docker save tartist-nft-worker:latest -o ${{ github.workspace }}/tartist-nft-worker.tar
 
     # Step 4.5: Verify tar tartist-nft-worker
     - name: Verify tarball exists
@@ -42,7 +42,7 @@ jobs:
     - name: Build tarti-nft-worker
       run: |
         docker build -t tarti-nft-worker:latest -f tarti-nft-worker/Dockerfile .
-        docker save tarti-nft-worker:latest -o tarti-nft-worker.tar
+        docker save tarti-nft-worker:latest -o ${{ github.workspace }}/tarti-nft-worker.tar
 
     # Step 5.5: Verify tar tarti-nft-worker
     - name: Verify tarball exists
@@ -56,9 +56,9 @@ jobs:
         username: ${{ secrets.DOCKER_SSH_USER }}
         key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
         source: |
-          ./tarti-nft-watcher.tar
-          ./tartist-nft-worker.tar
-          ./tarti-nft-worker.tar
+          ${{ github.workspace }}//tarti-nft-watcher.tar
+          ${{ github.workspace }}//tartist-nft-worker.tar
+          ${{ github.workspace }}//tarti-nft-worker.tar
         target: /tmp/
 
     # Step 7: SSH into the remote server and deploy
