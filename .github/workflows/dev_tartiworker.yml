@@ -19,29 +19,47 @@ jobs:
     - name: Set up Docker CLI
       uses: docker/setup-buildx-action@v2
 
+    - name: Copy secrets to env
+      run: |
+          echo "ETH_CLIENT_URL=${{ secrets.ETH_CLIENT_URL }}" >>${{ github.workspace }}/shared/.env
+          echo "CONTRACT_OWNER_WALLET_ADDRESS=${{ secrets.CONTRACT_OWNER_WALLET_ADDRESS }}" >> ${{ github.workspace }}/shared/.env
+          echo "CONTRACT_OWNER_WALLET_PK=${{ secrets.CONTRACT_OWNER_WALLET_PK }}" >> ${{ github.workspace }}/shared/.env
+          echo "TRAIT_HTTP_URI=${{ secrets.TRAIT_HTTP_URI }}" >> ${{ github.workspace }}/shared/.env
+          echo "PINATA_API_JWT=${{ secrets.PINATA_API_JWT }}" >> ${{ github.workspace }}/shared/.env
+          echo "IPFS_GATEWAY=${{ secrets.IPFS_GATEWAY }}" >> ${{ github.workspace }}/shared/.env
+          echo "NEW_TARTIST_METADATA_CID=${{ secrets.NEW_TARTIST_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
+          echo "NEW_TARTI_METADATA_CID=${{ secrets.NEW_TARTI_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
+          echo "CREATING_TARTIST_METADATA_CID=${{ secrets.CREATING_TARTIST_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
+          echo "CREATING_TARTI_METADATA_CID=${{ secrets.CREATING_TARTI_METADATA_CID }}" >> ${{ github.workspace }}p/shared/.env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ${{ github.workspace }}/shared/.env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ${{ github.workspace }}/shared/.env
+          echo "TARTI_QUEUE_NAME=${{ secrets.TARTI_QUEUE_NAME }}" >> ${{ github.workspace }}/shared/.env
+          echo "TARTIST_QUEUE_NAME=${{ secrets.TARTIST_QUEUE_NAME }}" >> ${{ github.workspace }}/shared/.env
+          chmod 600 /app/shared/.env
+
     # Step 3: Build and save tarti-nft-watcher
     - name: Build tarti-nft-watcher
       run: |
-        docker build -t tarti-nft-watcher:latest -f tarti-nft-watcher/Dockerfile .
-        docker save tarti-nft-watcher:latest -o ${{ github.workspace }}/tarti-nft-watcher.tar
+        docker build -t tarti-nft-watcher-dev:latest -f tarti-nft-watcher/Dockerfile .
+        docker save tarti-nft-watcher-dev:latest -o ${{ github.workspace }}/tarti-nft-watcher-dev.tar
            
     # Step 4: Build and save tartist-nft-worker
     - name: Build tartist-nft-worker
       run: |
-        docker build -t tartist-nft-worker:latest -f tartist-nft-worker/Dockerfile .
-        docker save tartist-nft-worker:latest -o ${{ github.workspace }}/tartist-nft-worker.tar
+        docker build -t tartist-nft-worker-dev:latest -f tartist-nft-worker/Dockerfile .
+        docker save tartist-nft-worker-dev:latest -o ${{ github.workspace }}/tartist-nft-worker-dev.tar
 
     # Step 5: Build and save tarti-nft-worker
     - name: Build tarti-nft-worker
       run: |
-        docker build -t tarti-nft-worker:latest -f tarti-nft-worker/Dockerfile .
-        docker save tarti-nft-worker:latest -o ${{ github.workspace }}/tarti-nft-worker.tar
+        docker build -t tarti-nft-worker-dev:latest -f tarti-nft-worker/Dockerfile .
+        docker save tarti-nft-worker-dev:latest -o ${{ github.workspace }}/tarti-nft-worker-dev.tar
 
     # Step 5: Build and save add-traits-to-tartist
     - name: Build add-traits-to-tartist
       run: |
-        docker build -t add-traits-to-tartist:latest -f add-traits-to-tartist/Dockerfile .
-        docker save add-traits-to-tartist:latest -o ${{ github.workspace }}/add-traits-to-tartist.tar
+        docker build -t add-traits-to-tartist-dev:latest -f add-traits-to-tartist/Dockerfile .
+        docker save add-traits-to-tartist-dev:latest -o ${{ github.workspace }}/add-traits-to-tartist-dev.tar
 
     - name: Transfer and Deploy Docker Images on Remote Server
       run: |
@@ -60,51 +78,34 @@ jobs:
         # SSH into Remote Server to Deploy
         ssh -i github-actions-key github-actions@${{ secrets.DOCKER_SSH_HOST }} << 'EOF'
           # Load Docker Images
-          docker load < /tmp/tarti-nft-watcher.tar
-          docker load < /tmp/tartist-nft-worker.tar
-          docker load < /tmp/tarti-nft-worker.tar
-          docker load < /tmp/add-traits-to-tartist.tar
+          docker load < /tmp/tarti-nft-watcher-dev.tar
+          docker load < /tmp/tartist-nft-worker-dev.tar
+          docker load < /tmp/tarti-nft-worker-dev.tar
+          docker load < /tmp/add-traits-to-tartist-dev.tar
 
           # Stop and Remove Old Containers
-          docker wait tarti-nft-watcher || true
-          docker-compose stop tarti-nft-watcher || true
+          docker wait tarti-nft-watcher-dev || true
+          docker-compose stop tarti-nft-watcher-dev || true
 
-          docker wait tartist-nft-worker || true
-          docker-compose stop tartist-nft-worker || true
+          docker wait tartist-nft-worker-dev || true
+          docker-compose stop tartist-nft-worker-dev || true
 
-          docker wait tarti-nft-worker || true
-          docker-compose stop tarti-nft-worker || true
+          docker wait tarti-nft-worker-dev || true
+          docker-compose stop tarti-nft-worker-dev || true
 
-          docker wait add-traits-to-tartist || true
-          docker-compose stop add-traits-to-tartist || true
+          docker wait add-traits-to-tartist-dev || true
+          docker-compose stop add-traits-to-tartist-dev || true
 
-          docker rm tarti-nft-watcher tartist-nft-worker tarti-nft-worker add-traits-to-tartist || true
-
-          echo "ETH_CLIENT_URL=${{ secrets.ETH_CLIENT_URL }}" >> /app/shared/.env
-          echo "CONTRACT_OWNER_WALLET_ADDRESS=${{ secrets.CONTRACT_OWNER_WALLET_ADDRESS }}" >> /app/shared/.env
-          echo "CONTRACT_OWNER_WALLET_PK=${{ secrets.CONTRACT_OWNER_WALLET_PK }}" >> /app/shared/.env
-          echo "TRAIT_HTTP_URI=${{ secrets.TRAIT_HTTP_URI }}" >> /app/shared/.env
-          echo "PINATA_API_JWT=${{ secrets.PINATA_API_JWT }}" >> /app/shared/.env
-          echo "IPFS_GATEWAY=${{ secrets.IPFS_GATEWAY }}" >> /app/shared/.env
-          echo "NEW_TARTIST_METADATA_CID=${{ secrets.NEW_TARTIST_METADATA_CID }}" >> /app/shared/.env
-          echo "NEW_TARTI_METADATA_CID=${{ secrets.NEW_TARTI_METADATA_CID }}" >> /app/shared/.env
-          echo "CREATING_TARTIST_METADATA_CID=${{ secrets.CREATING_TARTIST_METADATA_CID }}" >> /app/shared/.env
-          echo "CREATING_TARTI_METADATA_CID=${{ secrets.CREATING_TARTI_METADATA_CID }}" >> /app/shared/.env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> /app/shared/.env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> /app/shared/.env
-          echo "TARTI_QUEUE_NAME=${{ secrets.TARTI_QUEUE_NAME }}" >> /app/shared/.env
-          echo "TARTIST_QUEUE_NAME=${{ secrets.TARTIST_QUEUE_NAME }}" >> /app/shared/.env
-
-          chmod 600 /app/shared/.env
+          docker rm tarti-nft-watcher-dev tartist-nft-worker-dev tarti-nft-worker-dev add-traits-to-tartist-dev || true
 
           # Run New Containers
-          # docker run -d --name tarti-nft-watcher tarti-nft-watcher:latest
-          # docker run -d --name tartist-nft-worker tartist-nft-worker:latest
-          # docker run -d --name tarti-nft-worker tarti-nft-worker:latest
-          # docker run -d --name add-traits-to-tartist add-traits-to-tartist:latest
+          # docker run -d --name tarti-nft-watcher-dev tarti-nft-watcher-dev:latest
+          # docker run -d --name tartist-nft-worker-dev tartist-nft-worker-dev:latest
+          # docker run -d --name tarti-nft-worker-dev tarti-nft-worker-dev:latest
+          # docker run -d --name add-traits-to-tartist-dev add-traits-to-tartist-dev:latest
 
           # Clean Up Tarballs
-          rm /tmp/tarti-nft-watcher.tar /tmp/tartist-nft-worker.tar /tmp/tarti-nft-worker.tar /tmp/add-traits-to-tartist.tar
+          rm /tmp/tarti-nft-watcher-dev.tar /tmp/tartist-nft-worker-dev.tar /tmp/tarti-nft-worker-dev.tar /tmp/add-traits-to-tartist-dev.tar
         EOF
 
         rm github-actions-key
