@@ -3,12 +3,12 @@ name: Build and Deploy Docker Services
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: Mainnet
+    environment: Testnet
   
     steps:
     # Step 1: Checkout the source code
