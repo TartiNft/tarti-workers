@@ -35,7 +35,7 @@ jobs:
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ${{ github.workspace }}/shared/.env
           echo "TARTI_QUEUE_NAME=${{ secrets.TARTI_QUEUE_NAME }}" >> ${{ github.workspace }}/shared/.env
           echo "TARTIST_QUEUE_NAME=${{ secrets.TARTIST_QUEUE_NAME }}" >> ${{ github.workspace }}/shared/.env
-          chmod 600 /app/shared/.env
+          chmod 600 ${{ github.workspace }}/shared/.env
 
     # Step 3: Build and save tarti-nft-watcher
     - name: Build tarti-nft-watcher
