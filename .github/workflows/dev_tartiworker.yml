@@ -109,3 +109,4 @@ jobs:
         EOF
 
         rm github-actions-key
+        rm ${{ github.workspace }}/shared/.env
