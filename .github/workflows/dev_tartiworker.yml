@@ -85,16 +85,16 @@ jobs:
 
           # Stop and Remove Old Containers
           docker wait tarti-nft-watcher-dev || true
-          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yaml stop tarti-nft-watcher-dev || true
+          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yml stop tarti-nft-watcher-dev || true
 
           docker wait tartist-nft-worker-dev || true
-          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yaml stop tartist-nft-worker-dev || true
+          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yml stop tartist-nft-worker-dev || true
 
           docker wait tarti-nft-worker-dev || true
-          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yaml stop tarti-nft-worker-dev || true
+          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yml stop tarti-nft-worker-dev || true
 
           docker wait add-traits-to-tartist-dev || true
-          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yaml stop add-traits-to-tartist-dev || true
+          docker-compose -f /home/github-actions/tarti-infra/docker-compose.yml stop add-traits-to-tartist-dev || true
 
           docker rm tarti-nft-watcher-dev tartist-nft-worker-dev tarti-nft-worker-dev add-traits-to-tartist-dev || true
 
