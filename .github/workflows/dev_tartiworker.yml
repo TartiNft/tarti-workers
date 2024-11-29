@@ -30,7 +30,7 @@ jobs:
           echo "NEW_TARTIST_METADATA_CID=${{ secrets.NEW_TARTIST_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
           echo "NEW_TARTI_METADATA_CID=${{ secrets.NEW_TARTI_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
           echo "CREATING_TARTIST_METADATA_CID=${{ secrets.CREATING_TARTIST_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
-          echo "CREATING_TARTI_METADATA_CID=${{ secrets.CREATING_TARTI_METADATA_CID }}" >> ${{ github.workspace }}p/shared/.env
+          echo "CREATING_TARTI_METADATA_CID=${{ secrets.CREATING_TARTI_METADATA_CID }}" >> ${{ github.workspace }}/shared/.env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ${{ github.workspace }}/shared/.env
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ${{ github.workspace }}/shared/.env
           echo "TARTI_QUEUE_NAME=${{ secrets.TARTI_QUEUE_NAME }}" >> ${{ github.workspace }}/shared/.env
